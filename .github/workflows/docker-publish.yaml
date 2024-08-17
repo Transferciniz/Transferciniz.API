@@ -53,6 +53,10 @@ jobs:
         run: |
           sudo snap install kubectl --classic
 
+      - name: Create kube directory
+        run: |
+          mkdir -p $HOME/.kube
+
       - name: Apply Kubernetes manifests
         run: |
           echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
