@@ -18,6 +18,9 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
           
+      - name: Get KUBECONFIG
+        run: doctl kubernetes cluster kubeconfig save transferciniz-k8s-development
+
       - name: Build container image
         run: docker build -t ${{ secrets.REGISTRY_NAME }}/transferciniz-api:$(echo $GITHUB_SHA | head -c7) .
         
@@ -31,4 +34,4 @@ jobs:
         run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|${{ secrets.REGISTRY_NAME }}/transferfiniz-api:'${TAG}'|' $GITHUB_WORKSPACE/deployment.yml
 
       - name: Deploy to DigitalOcean Kubernetes
-        run: kubectl apply -f $GITHUB_WORKSPACE/deployment.yml
+        run: kubectl --kubeconfig=~/.kube/transferciniz-k8s-development-kubeconfig.yaml apply -f $GITHUB_WORKSPACE/deployment.yml
