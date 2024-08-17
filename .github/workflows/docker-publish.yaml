@@ -34,18 +34,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Set up kubectl
-        run: |
-          sudo snap install kubectl --classic
-
-      - name: Apply Kubernetes manifests
-        run: |
-          mkdir -p ${HOME}/.kube
-          echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config 
-          sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-          sudo chown $(id -u):$(id -g) $HOME/.kube/config
-          kubectl apply -f deployment.yaml
-          kubectl apply -f service.yaml
+     
+      - uses: actions-hub/kubectl@master
         env:
-          KUBECONFIG: $HOME/.kube/config
+          KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
+        with:
+          args: apply -f deployment.yaml
+          
+      - uses: actions-hub/kubectl@master
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
+        with:
+          args: apply -f service.yaml
+          
