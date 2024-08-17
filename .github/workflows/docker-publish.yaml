@@ -53,17 +53,10 @@ jobs:
         run: |
           sudo snap install kubectl --classic
 
-      - name: Create kube directory
-        run: |
-          mkdir -p $HOME/.kube
-
-      - name: Copy KUBECONFIG from repo
-        run: |
-          cp ./kubeconfig.yaml $HOME/.kube/config
-          cat $HOME/.kube/config
-
       - name: Apply Kubernetes manifests
         run: |
+          mkdir -p ${HOME}/.kube
+          echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config 
           kubectl apply -f deployment.yaml
           kubectl apply -f service.yaml
         env:
