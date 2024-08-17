@@ -60,6 +60,7 @@ jobs:
       - name: Copy KUBECONFIG from repo
         run: |
           cp ./kubeconfig.yaml $HOME/.kube/config
+          cat $HOME/.kube/config
 
       - name: Apply Kubernetes manifests
         run: |
