@@ -39,11 +39,11 @@ jobs:
         env:
           KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
         with:
-          args: apply -f deployment.yaml
+          args: apply -f deployment.yaml --validate=false
           
       - uses: actions-hub/kubectl@master
         env:
           KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
         with:
-          args: apply -f service.yaml
+          args: apply -f service.yaml --validate=false
           
