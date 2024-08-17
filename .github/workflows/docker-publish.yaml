@@ -57,10 +57,13 @@ jobs:
         run: |
           mkdir -p $HOME/.kube
 
+      - name: Copy KUBECONFIG from repo
+        run: |
+          cp ./kubeconfig.yaml $HOME/.kube/config
+
       - name: Apply Kubernetes manifests
         run: |
-          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
           kubectl apply -f deployment.yaml
           kubectl apply -f service.yaml
         env:
-          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+          KUBECONFIG: $HOME/.kube/config
