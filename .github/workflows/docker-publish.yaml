@@ -22,16 +22,16 @@ jobs:
         run: doctl kubernetes cluster kubeconfig save transferciniz-k8s-development
 
       - name: Build container image
-        run: docker build -t ${{ secrets.REGISTRY_NAME }}/transferciniz-api:$(echo $GITHUB_SHA | head -c7) .
+        run: docker build -t ${{ secrets.REGISTRY_NAME }}/transferciniz-api:latest .
         
       - name: Log in to DigitalOcean Container Registry with short-lived credentials
         run: doctl registry login --expiry-seconds 1200
         
       - name: Push image to DigitalOcean Container Registry
-        run: docker push ${{ secrets.REGISTRY_NAME }}/transferciniz-api:$(echo $GITHUB_SHA | head -c7)
+        run: docker push ${{ secrets.REGISTRY_NAME }}/transferciniz-api:latest
         
       - name: Update deployment file
-        run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|${{ secrets.REGISTRY_NAME }}/transferfiniz-api:'${TAG}'|' $GITHUB_WORKSPACE/deployment.yml
+        run: TAG=latest && sed -i 's|<IMAGE>|${{ secrets.REGISTRY_NAME }}/transferciniz-api:'${TAG}'|' $GITHUB_WORKSPACE/deployment.yml
 
       - name: Deploy to DigitalOcean Kubernetes
         run: kubectl --kubeconfig=/home/runner/.kube/config apply -f $GITHUB_WORKSPACE/deployment.yml
