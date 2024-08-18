@@ -19,7 +19,7 @@ jobs:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
           
       - name: Get KUBECONFIG
-        run: doctl kubernetes cluster kubeconfig save transferciniz-k8s-development
+        run: doctl kubernetes cluster kubeconfig save d5d68090-cb64-4105-ba1f-f43d2fb69692
 
       - name: Build container image
         run: docker build -t ${{ secrets.REGISTRY_NAME }}/transferciniz-api:latest .
