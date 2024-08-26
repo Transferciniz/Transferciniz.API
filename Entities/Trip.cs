@@ -7,16 +7,9 @@ public class Trip
     [Key]
     public Guid Id { get; set; }
 
-    public Guid CustomerId { get; set; }
-
-    public Guid UserId { get; set; }
-    public User User { get; set; }
-
-    public Guid CompanyId { get; set; }
-    public Company Company { get; set; }
-
-    public Guid VehicleId { get; set; }
-    public Vehicle Vehicle { get; set; }
+    public Guid TripHeaderId { get; set; }
+    public Guid DriverId { get; set; }
+    public Guid CompanyVehicleId { get; set; }
 
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
@@ -34,6 +27,4 @@ public class Trip
     public decimal TotalCost { get; set; }
     public decimal Fee { get; set; }
 
-    public Guid TransactionId { get; set; }
-    public Transaction Transaction { get; set; }
 }

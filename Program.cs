@@ -2,6 +2,7 @@ using MediatR;
 using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Transferciniz.API;
 using Transferciniz.API.Hubs;
@@ -42,7 +43,11 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IUserSession, UserSession>();
 builder.Services.AddTransient<IS3Service, S3Service>();
-builder.Services.AddDbContext<TransportationContext>();
+builder.Services.AddDbContext<TransportationContext>(x =>
+{
+    x.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL"), 
+        o => o.UseNetTopologySuite());
+});
 
 var app = builder.Build();
 
