@@ -11,6 +11,7 @@ namespace Transferciniz.API
             
         }
         public DbSet<User> Users { get; set; }
+        public DbSet<UserMembership> UserMemberships { get; set; }
         public DbSet<UserFile> UserFiles { get; set; }
         public DbSet<UserLocation> UserLocations { get; set; }
         public DbSet<UserDevice> UserDevices { get; set; }
@@ -25,7 +26,6 @@ namespace Transferciniz.API
         public DbSet<VehicleModel> VehicleModels { get; set; }
         public DbSet<CompanyVehicle> CompanyVehicles { get; set; }
         public DbSet<VehicleFile> VehicleFiles { get; set; }
-        public DbSet<VehicleLocation> VehicleLocations { get; set; }
         public DbSet<VehicleExtraService> VehicleExtraServices { get; set; }
         public DbSet<VehicleSegmentFilter> VehicleSegmentFilters { get; set; }
         public DbSet<VehicleTypeFilter> VehicleTypeFilters { get; set; }

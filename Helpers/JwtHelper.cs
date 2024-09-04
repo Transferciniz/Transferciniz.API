@@ -17,8 +17,32 @@ public static class JwtHelper
             new Claim("surname", user.Surname),
             new Claim("id", user.Id.ToString()),
             new Claim("sessionId", sessionId.ToString()),
-            new Claim("companyId", user.CompanyId.ToString() ?? string.Empty),
+            new Claim("sessionType", SessionType.User.ToString()),
             new Claim("userType", user.UserType.ToString()),
+        };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: _configuration["Jwt:Issuer"],
+            audience: _configuration["Jwt:Audience"],
+            claims: claims,
+            signingCredentials: creds);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+    
+    public static string GenerateToken(this Company company, IConfiguration _configuration, Guid sessionId)
+    {
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Email, company.Email),
+            new Claim(JwtRegisteredClaimNames.Name, company.Name),
+            new Claim("surname", string.Empty),
+            new Claim("id", company.Id.ToString()),
+            new Claim("sessionId", sessionId.ToString()),
+            new Claim("sessionType", SessionType.Company.ToString()),
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));

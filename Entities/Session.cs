@@ -6,8 +6,7 @@ public class Session
 {
     [Key]
     public Guid Id { get; set; }
-
-    public Guid UserId { get; set; }
-    public User User { get; set; }
+    public Guid RelatedId { get; set; }
+    public SessionType SessionType { get; set; }
     public DateTime LastActivity { get; set; }
 }

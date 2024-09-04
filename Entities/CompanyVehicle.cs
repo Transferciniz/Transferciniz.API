@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using NetTopologySuite.Geometries;
 
 namespace Transferciniz.API.Entities;
 
@@ -12,6 +13,7 @@ public class CompanyVehicle
     public Guid VehicleId { get; set; }
     public Vehicle Vehicle { get; set; }
 
+    public Geometry Location { get; set; }
 
     public ICollection<VehicleFile> VehicleFiles { get; set; }
     public ICollection<VehicleExtraService> VehicleExtraServices { get; set; }

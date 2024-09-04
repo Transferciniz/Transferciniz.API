@@ -11,9 +11,9 @@ public class TripHeader
     public decimal TotalTripCost { get; set; }
     public decimal TotalCost { get; set; }
     public decimal Fee { get; set; }
-    
-    public Guid TransactionId { get; set; }
-    public Transaction Transaction { get; set; }
+
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
 
     public ICollection<Trip> Trips { get; set; }
 }

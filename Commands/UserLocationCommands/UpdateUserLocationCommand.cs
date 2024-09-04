@@ -38,7 +38,7 @@ public class UpdateUserLocationCommandHandler : IRequestHandler<UpdateUserLocati
 
             if (request.VehicleId is not null)
             {
-                var vehicleLocation = await _context.VehicleLocations.FirstAsync(x => x.VehicleId == request.VehicleId,
+                var vehicleLocation = await _context.CompanyVehicles.FirstAsync(x => x.VehicleId == request.VehicleId,
                     cancellationToken: cancellationToken);
 
                 var distanceDifference = vehicleLocation.Location.Distance(point);

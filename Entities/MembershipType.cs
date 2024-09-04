@@ -1,8 +1,8 @@
 namespace Transferciniz.API.Entities;
 
-public enum UserRole
+public enum MembershipType
 {
-    Employee,
     Administrator,
-    Customer
+    Employee,
+    Driver
 }
