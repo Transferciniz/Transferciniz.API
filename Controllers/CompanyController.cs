@@ -20,6 +20,7 @@ public class CompanyController: ControllerBase
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<RegisterCompanyCommandResponse> Register(RegisterCompanyCommand request) => await _mediator.Send(request);
 
     [HttpGet]
