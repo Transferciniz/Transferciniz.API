@@ -10,8 +10,7 @@ public interface IUserSession
     public string Surname { get; set; }
     public Guid Id { get; set; }
     public Guid SessionId { get; set; }
-    public Guid? CompanyId { get; set; }
-    public UserType UserType { get; set; }
+    public AccountType AccountType { get; set; }
 }
 
 public class UserSession : IUserSession
@@ -21,8 +20,7 @@ public class UserSession : IUserSession
     public string Surname { get; set; }
     public Guid Id { get; set; }
     public Guid SessionId { get; set; }
-    public Guid? CompanyId { get; set; }
-    public UserType UserType { get; set; }
+    public AccountType AccountType { get; set; }
 
 
     public UserSession(IHttpContextAccessor httpContextAccessor)
@@ -30,14 +28,13 @@ public class UserSession : IUserSession
         var context = httpContextAccessor.HttpContext;
         if (context != null && context.User.Identity.IsAuthenticated)
         {
-            Enum.TryParse<UserType>(context.User.Claims.First(x => x.Type == "userType").Value, out var userType);
-            Name = context.User.Claims.First(x => x.Type == ClaimTypes.Name).Value;
-            Email = context.User.Claims.First(x => x.Type == ClaimTypes.Email).Value;
+            Enum.TryParse<AccountType>(context.User.Claims.First(x => x.Type == "accountType").Value, out var userType);
+            Name = context.User.Claims.First(x => x.Type == "name").Value;
+           // TODO: fix this Email = context.User.Claims.First(x => x.Type == "email").Value;
             Surname = context.User.Claims.First(x => x.Type == "surname").Value;
-            UserType = userType;
+            AccountType = userType;
             Id = Guid.Parse(context.User.Claims.First(x => x.Type == "id").Value);
             SessionId = Guid.Parse(context.User.Claims.First(x => x.Type == "sessionId").Value);
-            CompanyId = Guid.Parse(context.User.Claims.First(x => x.Type == "companyId")?.Value ?? Guid.Empty.ToString());
         }
     }
 }

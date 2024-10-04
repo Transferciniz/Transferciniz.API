@@ -2,12 +2,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Transferciniz.API.Entities;
 
-public class UserMembership
+public class AccountMembership
 {
     [Key]
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
-    public Guid UserId { get; set; }
-    public Guid CompanyId { get; set; }
+    public Guid AccountId { get; set; }
+    public Guid MemberId { get; set; }
     public MembershipType MembershipType { get; set; }
 }

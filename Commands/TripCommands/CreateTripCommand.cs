@@ -7,19 +7,28 @@ using Transferciniz.API.Services;
 
 namespace Transferciniz.API.Commands.TripCommands;
 
-public class CreateTripCommand: IRequest<TripHeader>
+public class CreateTripCommand: IRequest<CreateTripCommandResponse>
 {
-    public List<CombinationPricePair> Vehicles { get; set; }
-    public Geometry StartCoordinate { get; set; }
+    public List<CombinationPricePair> SelectedVehicleCombinations { get; set; }
 
-    public string RouteJson { get; set; }
-    
+    public List<Waypoint> Waypoints { get; set; }
     public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
+    public string Name { get; set; }
     
 }
 
-public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, TripHeader>
+public class Waypoint
+{
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
+}
+
+public class CreateTripCommandResponse
+{
+    public Guid Id { get; set; }
+}
+
+public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, CreateTripCommandResponse>
 {
     private readonly TransportationContext _context;
     private readonly IUserSession _userSession;
@@ -30,15 +39,19 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, TripH
         _userSession = userSession;
     }
 
-    public async Task<TripHeader> Handle(CreateTripCommand request, CancellationToken cancellationToken)
+    public async Task<CreateTripCommandResponse> Handle(CreateTripCommand request, CancellationToken cancellationToken)
     {
-
+        var startCoordinate = new Point(request.Waypoints[0].Latitude, request.Waypoints[0].Longitude);
         var tripHeader = await _context.TripHeaders.AddAsync(new TripHeader
         {
             Id = Guid.NewGuid(),
             Fee = 0,
-            TotalCost = request.Vehicles.Sum(x => x.TotalPrice),
-            TotalTripCost = request.Vehicles.Sum(x => x.TotalPrice),
+            Name = request.Name,
+            AccountId = _userSession.Id,
+            StartDate = request.StartDate.ToUniversalTime(),
+            Status = TripStatus.WaitingApprove,
+            TotalCost = request.SelectedVehicleCombinations.Sum(x => x.TotalPrice),
+            TotalTripCost = request.SelectedVehicleCombinations.Sum(x => x.TotalPrice),
             TotalExtraServiceCost = 0,
         }, cancellationToken);
         await _context.Transactions.AddAsync(new Transaction
@@ -49,22 +62,22 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, TripH
             UserId = _userSession.Id,
             TripId = tripHeader.Entity.Id,
         }, cancellationToken);
-        foreach (var combinationPricePair in request.Vehicles)
+        foreach (var combinationPricePair in request.SelectedVehicleCombinations)
         {
             foreach (var vehicleUsagePair in combinationPricePair.Vehicles)
             {
-                var vehicles = await _context.CompanyVehicles
+                var vehicles = await _context.AccountVehicles
                     .Where(x => x.VehicleId == vehicleUsagePair.Vehicle.Id)
                     .Select(x => new
                     {
                         x.Id,
-                        Distance = request.StartCoordinate.Distance(x.Location)
+                        Distance = startCoordinate.Distance(x.Location)
                     })
                     .OrderBy(x=> x.Distance)
                     .Skip(0)
                     .Take(vehicleUsagePair.Usage)
                     .ToListAsync(cancellationToken: cancellationToken);
-                for (int i = 1; i < vehicleUsagePair.Usage; i++)
+                for (int i = 0; i < vehicleUsagePair.Usage; i++)
                 {
                     var vehicle = vehicles[0];
                     vehicles.RemoveAt(0);
@@ -72,11 +85,15 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, TripH
                     {
                         Id = Guid.NewGuid(),
                         Fee = 0,
+                        WayPoints = request.Waypoints.Select(x =>
+                        {
+                            var factory = new GeometryFactory();
+                            var point =  factory.CreatePoint(new Coordinate(x.Latitude, x.Longitude));
+                            return point as Geometry;
+                        }).ToList(),
                         TotalCost = combinationPricePair.TotalPrice / vehicleUsagePair.Usage,
-                        RouteJson = request.RouteJson,
                         TotalTripCost = combinationPricePair.TotalPrice / vehicleUsagePair.Usage,
-                        StartDate = request.StartDate,
-                        EndDate = request.EndDate,
+                        StartDate = request.StartDate.ToUniversalTime(),
                         TotalExtraServiceCost = combinationPricePair.TotalPrice / vehicleUsagePair.Usage,
                         TripHeaderId = tripHeader.Entity.Id,
                         CompanyVehicleId = vehicle.Id,
@@ -86,7 +103,10 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, TripH
         }
 
         await _context.SaveChangesAsync(cancellationToken);
-        return tripHeader.Entity;
+        return new CreateTripCommandResponse
+        {
+           Id = tripHeader.Entity.Id
+        };
 
     }
 }

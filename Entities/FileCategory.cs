@@ -6,6 +6,8 @@ public enum FileCategory
     Kasko,
     SRC,
     Ehliyet,
+    Ruhsat,
+    VergiLevhasi,
     D2,
     Tursab
 }

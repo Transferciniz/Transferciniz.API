@@ -4,35 +4,50 @@ using Transferciniz.API.Helpers;
 
 namespace Transferciniz.API.Commands.AuthCommands;
 
-public class RegisterUserCommand: IRequest<RegisterUserCommandResponse>
+public class RegisterCommand: IRequest<RegisterCommandResponse>
 {
     public string Name { get; set; }
     public string Surname { get; set; }
     public string Email { get; set; }
+    public string Username { get; set; }
     public string Password { get; set; }
-    public UserType UserType { get; set; }
+    public AccountType AccountType { get; set; }
+    public string TaxNumber { get; set; }
+    public string InvoiceAddress { get; set; }
 }
 
-public class RegisterUserCommandResponse
+public class RegisterCommandResponse
 {
     public string Token { get; set; }
 }
 
-public class RegisterUserCommandHandler: IRequestHandler<RegisterUserCommand, RegisterUserCommandResponse>
+public class RegisterUserCommandHandler: IRequestHandler<RegisterCommand, RegisterCommandResponse>
 {
     private readonly TransportationContext _context;
     private readonly IConfiguration _configuration;
-    
-    public async Task<RegisterUserCommandResponse> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+
+    public RegisterUserCommandHandler(TransportationContext context, IConfiguration configuration)
     {
-        var user = await _context.Users.AddAsync(new User
+        _context = context;
+        _configuration = configuration;
+    }
+
+    public async Task<RegisterCommandResponse> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    {
+        var user = await _context.Accounts.AddAsync(new Account
         {
             Id = Guid.NewGuid(),
             Name = request.Name,
             Surname = request.Surname,
+            Username = request.Username,
             Email = request.Email,
             Password = request.Password.ToMD5(),
-            UserType = request.UserType
+            AccountType = request.AccountType,
+            CommissionRate = 10,
+            TaxRate = 20,
+            ProfilePicture = "",
+            TaxNumber = request.TaxNumber,
+            InvoiceAddress = request.InvoiceAddress,
         }, cancellationToken);
         
         await _context.SaveChangesAsync(cancellationToken);
@@ -40,12 +55,11 @@ public class RegisterUserCommandHandler: IRequestHandler<RegisterUserCommand, Re
         {
             Id = Guid.NewGuid(),
             LastActivity = DateTime.UtcNow,
-            RelatedId = user.Entity.Id,
-            SessionType = SessionType.User
+            AccountId = user.Entity.Id,
         }, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return new RegisterUserCommandResponse
+        return new RegisterCommandResponse
         {
             Token = user.Entity.GenerateToken(_configuration, session.Entity.Id)
         };

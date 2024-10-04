@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using NetTopologySuite.Geometries;
 
 namespace Transferciniz.API.Entities;
 
@@ -12,9 +13,8 @@ public class Trip
     public Guid CompanyVehicleId { get; set; }
 
     public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
 
-    public string RouteJson { get; set; }
+    public List<Geometry> WayPoints { get; set; }
     
     public ICollection<TripExtraService> TripExtraServices { get; set; }
 

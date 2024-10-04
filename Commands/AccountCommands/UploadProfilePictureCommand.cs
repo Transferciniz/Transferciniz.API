@@ -2,7 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Transferciniz.API.Services;
 
-namespace Transferciniz.API.Commands.AuthCommands;
+namespace Transferciniz.API.Commands.AccountCommands;
 
 public class UploadProfilePictureCommand: IRequest<UploadProfilePictureCommandResponse>
 {
@@ -30,9 +30,9 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
     public async Task<UploadProfilePictureCommandResponse> Handle(UploadProfilePictureCommand request, CancellationToken cancellationToken)
     {
         var url = await _s3Service.UploadFileToSpacesAsync(request.File);
-        var user = await _context.Users.Where(x => x.Id == _session.Id).FirstAsync(cancellationToken: cancellationToken);
+        var user = await _context.Accounts.Where(x => x.Id == _session.Id).FirstAsync(cancellationToken: cancellationToken);
         user.ProfilePicture = url;
-        _context.Users.Update(user);
+        _context.Accounts.Update(user);
         await _context.SaveChangesAsync(cancellationToken);
         return new UploadProfilePictureCommandResponse
         {

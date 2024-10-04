@@ -5,12 +5,12 @@ using Transferciniz.API.Services;
 
 namespace Transferciniz.API.Queries.CompanyQueries;
 
-public class GetCompanyVehiclesQuery: IRequest<List<CompanyVehicle>>
+public class GetAccountVehiclesQuery: IRequest<List<AccountVehicle>>
 {
     public Guid CompanyId { get; set; }
 }
 
-public class GetCompanyVehiclesQueryHandler: IRequestHandler<GetCompanyVehiclesQuery, List<CompanyVehicle>>
+public class GetCompanyVehiclesQueryHandler: IRequestHandler<GetAccountVehiclesQuery, List<AccountVehicle>>
 {
     private readonly IUserSession _userSession;
     private readonly TransportationContext _context;
@@ -21,10 +21,10 @@ public class GetCompanyVehiclesQueryHandler: IRequestHandler<GetCompanyVehiclesQ
         _context = context;
     }
 
-    public async Task<List<CompanyVehicle>> Handle(GetCompanyVehiclesQuery request, CancellationToken cancellationToken)
+    public async Task<List<AccountVehicle>> Handle(GetAccountVehiclesQuery request, CancellationToken cancellationToken)
     {
-        return await _context.CompanyVehicles
-            .Where(x => x.CompanyId == (Guid.Empty == request.CompanyId ? _userSession.CompanyId : request.CompanyId))
+        return await _context.AccountVehicles
+            .Where(x => x.AccountId == (Guid.Empty == request.CompanyId ? _userSession.Id : request.CompanyId))
             .Include(x => x.Vehicle)
             .Include(x => x.VehicleExtraServices)
             .Include(x => x.VehicleSegmentFilters)

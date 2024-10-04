@@ -70,8 +70,13 @@ public class GetAvailableVehiclesQueryHandler : IRequestHandler<GetAvailableVehi
 
         var intersectedVehiclesIds = extraServicesIncludedVehicles.Intersect(segmentFilteredVehicles).Intersect(typeFilteredVehicles);
 
-        var vehicles = await _context.Vehicles
-            .Where(x => intersectedVehiclesIds.Contains(x.Id))
+        var vehicles = await _context.AccountVehicles
+          //  .Where(x => intersectedVehiclesIds.Contains(x.Id))
+          .Include(x => x.Vehicle)
+          .ThenInclude(x=> x.VehicleModel)
+          .Include(x => x.Vehicle)
+          .ThenInclude(x => x.VehicleBrand)
+          .Select(x => x.Vehicle)
             .ToListAsync(cancellationToken: cancellationToken);
 
         var vehicleCombinations = CalculateAllCombinations(vehicles, request.TotalPerson);
@@ -79,7 +84,7 @@ public class GetAvailableVehiclesQueryHandler : IRequestHandler<GetAvailableVehi
         
         foreach (var vehicleCombination in vehicleCombinations)
         {
-            var totalPrice = vehicleCombination.VehicleUsage.Sum(keyValuePair => CalculatePriceOfVehicleUsage(keyValuePair.Key, keyValuePair.Value, request.TotalLengthOfRoad));
+            var totalPrice = vehicleCombination.VehicleUsage.Sum(keyValuePair => CalculatePriceOfVehicleUsage(keyValuePair.Key, keyValuePair.Value, request.TotalLengthOfRoad/1000));
 
             response.Add(new CombinationPricePair
             {
@@ -125,6 +130,8 @@ public class GetAvailableVehiclesQueryHandler : IRequestHandler<GetAvailableVehi
         if (remainingPeople < 0)
         {
             // Eğer kalan kişi sayısı negatif olduysa, bu kombinasyon geçersizdir, geri dön
+            allCombinations.Add(new CombinationResult(new Dictionary<Vehicle, int>(currentCombination), currentCombination.Sum(c => c.Value * c.Key.VehicleModel.TotalCapacity)));
+
             return;
         }
 

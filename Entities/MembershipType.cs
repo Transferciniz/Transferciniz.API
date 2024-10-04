@@ -4,5 +4,6 @@ public enum MembershipType
 {
     Administrator,
     Employee,
-    Driver
+    Driver,
+    Friend
 }

@@ -4,7 +4,7 @@ using Transferciniz.API.Services;
 
 namespace Transferciniz.API.Queries.CompanyQueries;
 
-public class GetCompanyVehiclesForMapQuery: IRequest<List<MapTrackingResponse>>
+public class GetAccountVehiclesForMapQuery: IRequest<List<MapTrackingResponse>>
 {
     public Guid CompanyId { get; set; }
     public bool IncludeDrivers { get; set; }
@@ -27,7 +27,7 @@ public enum MapEntityType
     Vehicle
 }
 
-public class GetCompanyVehiclesForMapHandler: IRequestHandler<GetCompanyVehiclesForMapQuery, List<MapTrackingResponse>>
+public class GetCompanyVehiclesForMapHandler: IRequestHandler<GetAccountVehiclesForMapQuery, List<MapTrackingResponse>>
 {
     private readonly IUserSession _userSession;
     private readonly TransportationContext _context;
@@ -38,10 +38,10 @@ public class GetCompanyVehiclesForMapHandler: IRequestHandler<GetCompanyVehicles
         _context = context;
     }
 
-    public async Task<List<MapTrackingResponse>> Handle(GetCompanyVehiclesForMapQuery request, CancellationToken cancellationToken)
+    public async Task<List<MapTrackingResponse>> Handle(GetAccountVehiclesForMapQuery request, CancellationToken cancellationToken)
     {
-        return await _context.CompanyVehicles
-            .Where(x => x.CompanyId == (Guid.Empty == request.CompanyId ? _userSession.CompanyId : request.CompanyId))
+        return await _context.AccountVehicles
+            .Where(x => x.AccountId == (Guid.Empty == request.CompanyId ? _userSession.Id : request.CompanyId))
             .Select(x => new MapTrackingResponse
             {
                 Description = $"{x.Plate} Plakalı Araç",

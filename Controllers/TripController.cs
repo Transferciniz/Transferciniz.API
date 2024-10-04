@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Transferciniz.API.Commands.TripCommands;
 using Transferciniz.API.Entities;
 using Transferciniz.API.Queries.TripQueries;
+using Transferciniz.API.Queries.VehicleFiltersQueries;
 
 namespace Transferciniz.API.Controllers;
 
@@ -23,12 +24,18 @@ public class TripController: ControllerBase
     public async Task<GetAvailableVehiclesQueryResponse> GetAvailableVehicles(GetAvailableVehiclesQuery request) => await _mediator.Send(request);
 
     [HttpPost]
-    public async Task<TripHeader> CreateTrip(CreateTripCommand request) => await _mediator.Send(request);
+    public async Task<CreateTripCommandResponse> CreateTrip(CreateTripCommand request) => await _mediator.Send(request);
 
     [HttpGet]
-    public async Task<List<TripHeader>> GetIncomingTripHeaders(GetIncomingTripsQuery request) => await _mediator.Send(request);
+    public async Task<List<TripHeader>> GetTripHeaders(GetIncomingTripsQuery request) => await _mediator.Send(request);
 
     [HttpGet]
-    public async Task<List<Trip>> GetTrips([FromQuery] GetTripDetailsQuery request) => await _mediator.Send(request);
+    public async Task<List<Trip>> GetTripDetails([FromQuery] GetTripDetailsQuery request) => await _mediator.Send(request);
+
+    [HttpGet]
+    public async Task<GetVehicleFiltersQueryResponse> GetVehicleFilters([FromQuery]GetVehicleFiltersQuery request) => await _mediator.Send(request);
+
+    [HttpGet]
+    public async Task<List<TripHeader>> GetMyTrips([FromQuery] GetMyTripsQuery request) => await _mediator.Send(request);
 
 }

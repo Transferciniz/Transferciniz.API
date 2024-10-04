@@ -1,5 +1,8 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Skybrud.Social.Google;
+using Transferciniz.API.Commands.AccountCommands;
 using Transferciniz.API.Commands.AuthCommands;
 using Transferciniz.API.Entities;
 
@@ -19,8 +22,14 @@ public class AuthController: ControllerBase
 
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<LoginCommandResponse> Login(LoginCommand request) => await _mediator.Send(request);
 
     [HttpPost]
-    public async Task<UploadProfilePictureCommandResponse> ChangeProfilePicture(UploadProfilePictureCommand request) => await _mediator.Send(request);
+    [AllowAnonymous]
+    public async Task<RegisterCommandResponse> Register(RegisterCommand request) => await _mediator.Send(request);
+
+   
+
+
 }

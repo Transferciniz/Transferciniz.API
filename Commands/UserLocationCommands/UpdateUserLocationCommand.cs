@@ -31,14 +31,15 @@ public class UpdateUserLocationCommandHandler : IRequestHandler<UpdateUserLocati
         if (session is not null)
         {
             var point = new GeometryFactory().ToGeometry(new Envelope(new Coordinate(request.XLine, request.YLine)));
-            var userLocation = await _context.UserLocations.FirstAsync(x => x.UserId == request.UserId,
+            var userLocation = await _context.Accounts.FirstAsync(x => x.Id == request.UserId,
                 cancellationToken: cancellationToken);
-            userLocation.Location = point;
-            userLocation.UpdatedAt = DateTime.UtcNow;
+            userLocation.Latitude = request.XLine;
+            userLocation.Longitude = request.YLine;
+            userLocation.LastLocationUpdateTime = DateTime.UtcNow;
 
             if (request.VehicleId is not null)
             {
-                var vehicleLocation = await _context.CompanyVehicles.FirstAsync(x => x.VehicleId == request.VehicleId,
+                var vehicleLocation = await _context.AccountVehicles.FirstAsync(x => x.VehicleId == request.VehicleId,
                     cancellationToken: cancellationToken);
 
                 var distanceDifference = vehicleLocation.Location.Distance(point);
