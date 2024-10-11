@@ -26,7 +26,7 @@ public class VehicleUsagePair
 
 public class CombinationPricePair
 {
-    public List<VehicleUsagePair> Vehicles { get; set; }
+    public List<GetAvailableVehiclesQueryHandler.VehicleUsagePair> Vehicles { get; set; }
     public decimal TotalPrice { get; set; }
 }
 
@@ -70,28 +70,26 @@ public class GetAvailableVehiclesQueryHandler : IRequestHandler<GetAvailableVehi
 
         var intersectedVehiclesIds = extraServicesIncludedVehicles.Intersect(segmentFilteredVehicles).Intersect(typeFilteredVehicles);
 
-        var vehicles = await _context.AccountVehicles
-          //  .Where(x => intersectedVehiclesIds.Contains(x.Id))
-          .Include(x => x.Vehicle)
-          .ThenInclude(x=> x.VehicleModel)
-          .Include(x => x.Vehicle)
-          .ThenInclude(x => x.VehicleBrand)
-          .Select(x => x.Vehicle)
+        var vehicles = await _context.Vehicles
+          .Include(x=> x.VehicleModel)
+          .Include(x => x.VehicleBrand)
+          .OrderBy(x => x.VehicleModel.Capacity)
+          .Reverse()
             .ToListAsync(cancellationToken: cancellationToken);
 
-        var vehicleCombinations = CalculateAllCombinations(vehicles, request.TotalPerson);
+        var vehicleCombinations = CalculateCombinations(vehicles, request.TotalPerson);
         var response = new GetAvailableVehiclesQueryResponse();
         
         foreach (var vehicleCombination in vehicleCombinations)
         {
-            var totalPrice = vehicleCombination.VehicleUsage.Sum(keyValuePair => CalculatePriceOfVehicleUsage(keyValuePair.Key, keyValuePair.Value, request.TotalLengthOfRoad/1000));
+            var totalPrice = vehicleCombination.Vehicles.Sum(x => CalculatePriceOfVehicleUsage(x.Vehicle, x.Usage, request.TotalLengthOfRoad/1000));
 
             response.Add(new CombinationPricePair
             {
-                Vehicles = vehicleCombination.VehicleUsage.Select(x => new VehicleUsagePair
+                Vehicles = vehicleCombination.Vehicles.Select(x => new VehicleUsagePair
                 {
-                    Usage = x.Value,
-                    Vehicle = x.Key
+                    Usage = x.Usage,
+                    Vehicle = x.Vehicle
                 }).ToList(),
                 TotalPrice = totalPrice
             });
@@ -103,7 +101,105 @@ public class GetAvailableVehiclesQueryHandler : IRequestHandler<GetAvailableVehi
     
     decimal CalculatePriceOfVehicleUsage(Vehicle vehicle, int usage, decimal distance) => vehicle.BasePrice * distance * usage;
 
+    // VehicleUsagePair sınıfı
+    public class VehicleUsagePair
+    {
+        public Vehicle Vehicle { get; set; }
+        public int Usage { get; set; }
+    }
+    
+     // Combination sınıfı
+    public class Combination
+    {
+        public List<VehicleUsagePair> Vehicles { get; set; } = new List<VehicleUsagePair>();
 
+        // Aynı kombinasyonları kontrol edebilmek için, araçları sıralı tutacağız
+        public override bool Equals(object obj)
+        {
+            var other = obj as Combination;
+            if (other == null) return false;
+
+            // Aynı araç kombinasyonları olmalı
+            if (Vehicles.Count != other.Vehicles.Count) return false;
+
+            // Araç ve kullanım sayısına göre karşılaştırma yapıyoruz
+            return Vehicles.OrderBy(v => v.Vehicle.Id).SequenceEqual(other.Vehicles.OrderBy(v => v.Vehicle.Id));
+        }
+
+        public override int GetHashCode()
+        {
+            // Sıralı şekilde hash hesaplanacak
+            return Vehicles.OrderBy(v => v.Vehicle.Id)
+                           .Select(v => v.Vehicle.Id.GetHashCode() ^ v.Usage) // Araç GUID ve kullanımı birleştiriyoruz
+                           .Aggregate(0, (a, b) => a ^ b); // XOR operatörü ile hash hesaplaması
+        }
+    }
+
+    // Kombinasyonları hesaplayan fonksiyon
+    static List<Combination> CalculateCombinations(List<Vehicle> vehicles, int passengerCount)
+    {
+        HashSet<Combination> results = new HashSet<Combination>();
+
+        // Recursive fonksiyon
+        FindCombinations(vehicles, passengerCount, new Dictionary<Guid, int>(), 0, results);
+
+        return results.ToList();
+    }
+
+    static void FindCombinations(List<Vehicle> vehicles, int passengersLeft, Dictionary<Guid, int> currentCombination, int startIndex, HashSet<Combination> results)
+    {
+        // Eğer tüm yolcuları taşıyabilecek bir kombinasyon bulduysak sonuçlara ekle
+        if (passengersLeft <= 0)
+        {
+            Combination combination = new Combination();
+            foreach (var entry in currentCombination)
+            {
+                Vehicle vehicle = vehicles.Find(v => v.Id == entry.Key);
+                combination.Vehicles.Add(new VehicleUsagePair
+                {
+                    Vehicle = vehicle,
+                    Usage = entry.Value
+                });
+            }
+
+            // Sıralı ve unique olacak şekilde kombinasyonları ekliyoruz
+            results.Add(combination);
+            return;
+        }
+
+        // Araçları sırayla deneyelim
+        for (int i = startIndex; i < vehicles.Count; i++)
+        {
+            var vehicle = vehicles[i];
+
+            // Her araç için maksimum kaç tane gerekebileceğini hesapla
+            int maxVehicleCount = (int)Math.Ceiling((double)passengersLeft / vehicle.VehicleModel.Capacity);
+
+            // Mevcut kombinasyona araç ekleyelim
+            if (!currentCombination.ContainsKey(vehicle.Id))
+            {
+                currentCombination[vehicle.Id] = 0;
+            }
+
+            // Bu araç için 1'den maxVehicleCount'a kadar kombinasyonları deneyelim
+            currentCombination[vehicle.Id] += 1;
+
+            FindCombinations(vehicles, passengersLeft - vehicle.VehicleModel.Capacity, currentCombination, i, results);
+
+            // Geri al (backtrack)
+            currentCombination[vehicle.Id] -= 1;
+
+            // Eğer mevcut araç sayısı 0'a düşerse, o aracı kombinasyondan kaldır
+            if (currentCombination[vehicle.Id] == 0)
+            {
+                currentCombination.Remove(vehicle.Id);
+            }
+        }
+    }
+    
+    
+    /*
+    
     static List<CombinationResult> CalculateAllCombinations(List<Vehicle> vehicles, int totalPeople)
     {
         // Kapasiteleri büyükten küçüğe doğru sıralama
@@ -158,4 +254,5 @@ public class GetAvailableVehiclesQueryHandler : IRequestHandler<GetAvailableVehi
             }
         }
     }
+    */
 }

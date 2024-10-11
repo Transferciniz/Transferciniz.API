@@ -23,8 +23,19 @@ public class GetMyTripsQueryHandler : IRequestHandler<GetMyTripsQuery, List<Trip
 
     public async Task<List<TripHeader>> Handle(GetMyTripsQuery request, CancellationToken cancellationToken)
     {
-        return await _context.TripHeaders.Where(x => x.AccountId == _session.Id)
-            .OrderBy(x => x.StartDate)
+        return await _context.TripHeaders
+            .Include(x => x.Trips)
+            .ThenInclude(x => x.WayPoints)
+            .ThenInclude(x => x.WayPointUsers.Where(y => y.AccountId == _session.Id))
+            .Include(x => x.Trips)
+            .ThenInclude(x => x.AccountVehicle)
+            .ThenInclude(x => x.Vehicle)
+            .ThenInclude(x => x.VehicleBrand)
+            .Include(x => x.Trips)
+            .ThenInclude(x => x.AccountVehicle)
+            .ThenInclude(x => x.Vehicle)
+            .ThenInclude(x => x.VehicleModel)
             .ToListAsync(cancellationToken: cancellationToken);
+       
     }
 }

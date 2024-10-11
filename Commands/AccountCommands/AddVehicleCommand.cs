@@ -1,12 +1,12 @@
 using MediatR;
 using NetTopologySuite.Geometries;
 using Transferciniz.API.Entities;
+using Transferciniz.API.Services;
 
 namespace Transferciniz.API.Commands.AccountCommands;
 
 public class AddVehicleCommand: IRequest<AccountVehicle>
 {
-    public Guid AccountId { get; set; }
     public Guid VehicleId { get; set; }
     public string Plate { get; set; }
 }
@@ -14,10 +14,12 @@ public class AddVehicleCommand: IRequest<AccountVehicle>
 public class AddVehicleCommandHandler: IRequestHandler<AddVehicleCommand, AccountVehicle>
 {
     private readonly TransportationContext _context;
+    private readonly IUserSession _userSession;
 
-    public AddVehicleCommandHandler(TransportationContext context)
+    public AddVehicleCommandHandler(TransportationContext context, IUserSession userSession)
     {
         _context = context;
+        _userSession = userSession;
     }
 
     public async Task<AccountVehicle> Handle(AddVehicleCommand request, CancellationToken cancellationToken)
@@ -25,10 +27,11 @@ public class AddVehicleCommandHandler: IRequestHandler<AddVehicleCommand, Accoun
         var entity = await _context.AccountVehicles.AddAsync(new AccountVehicle
         {
             Id = Guid.NewGuid(),
-            AccountId = request.AccountId,
+            AccountId = _userSession.Id,
             VehicleId = request.VehicleId,
             Plate = request.Plate,
-            Location = new Point(0,0)
+            Latitude = 0,
+            Longitude = 0,
         }, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
         return entity.Entity;

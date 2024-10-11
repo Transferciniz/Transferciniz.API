@@ -53,6 +53,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IUserSession, UserSession>();
 builder.Services.AddTransient<IS3Service, S3Service>();
+builder.Services.AddSingleton<LocationHub>();
 builder.Services.AddDbContext<TransportationContext>(x =>
 {
     x.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL"),

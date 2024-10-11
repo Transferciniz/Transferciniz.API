@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Skybrud.Essentials.Collections.Extensions;
 using Transferciniz.API.Entities;
 
 namespace Transferciniz.API.Queries.TripQueries;
@@ -23,6 +24,17 @@ public class GetTripDetailsQueryHandler: IRequestHandler<GetTripDetailsQuery, Li
        return await _context.Trips
             .Where(x => x.TripHeaderId == request.TripHeaderId)
             .Include(x => x.TripExtraServices)
+            
+            .Include(x => x.AccountVehicle)
+            .ThenInclude(x => x.Vehicle)
+            .ThenInclude(x => x.VehicleBrand)
+            
+            .Include(x => x.AccountVehicle)
+            .ThenInclude(x => x.Vehicle)
+            .ThenInclude(x => x.VehicleModel)
+            
+            .Include(x => x.WayPoints)
+            .ThenInclude(x => x.WayPointUsers)
             .ToListAsync(cancellationToken: cancellationToken);
     }
 }

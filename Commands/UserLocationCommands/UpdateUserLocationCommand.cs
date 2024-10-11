@@ -25,7 +25,7 @@ public class UpdateUserLocationCommandHandler : IRequestHandler<UpdateUserLocati
 
     public async Task<Unit> Handle(UpdateUserLocationCommand request, CancellationToken cancellationToken)
     {
-        var session =
+        /*var session =
             await _context.Sessions.FirstOrDefaultAsync(x => x.Id == request.SessionId,
                 cancellationToken: cancellationToken);
         if (session is not null)
@@ -53,8 +53,7 @@ public class UpdateUserLocationCommandHandler : IRequestHandler<UpdateUserLocati
             }
 
             await _context.SaveChangesAsync(cancellationToken);
-        }
-
+        }*/
         return Unit.Value;
     }
 }

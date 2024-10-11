@@ -2,7 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Transferciniz.API;
 
@@ -11,9 +13,11 @@ using Transferciniz.API;
 namespace Transferciniz.API.Migrations
 {
     [DbContext(typeof(TransportationContext))]
-    partial class TransportationContextModelSnapshot : ModelSnapshot
+    [Migration("20241005120801_waypoint_relation")]
+    partial class waypoint_relation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,18 +180,13 @@ namespace Transferciniz.API.Migrations
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uuid");
 
-                    b.Property<double>("Latitude")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("Longitude")
-                        .HasColumnType("double precision");
+                    b.Property<Geometry>("Location")
+                        .IsRequired()
+                        .HasColumnType("geometry");
 
                     b.Property<string>("Plate")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
 
                     b.Property<Guid>("VehicleId")
                         .HasColumnType("uuid");
@@ -268,7 +267,7 @@ namespace Transferciniz.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AccountVehicleId")
+                    b.Property<Guid>("CompanyVehicleId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("DriverId")
@@ -279,9 +278,6 @@ namespace Transferciniz.API.Migrations
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
 
                     b.Property<decimal>("TotalCost")
                         .HasColumnType("numeric");
@@ -296,8 +292,6 @@ namespace Transferciniz.API.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AccountVehicleId");
 
                     b.HasIndex("TripHeaderId");
 
@@ -357,27 +351,6 @@ namespace Transferciniz.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TripHeaders");
-                });
-
-            modelBuilder.Entity("Transferciniz.API.Entities.TripHistory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("DateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("TripId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TripHistories");
                 });
 
             modelBuilder.Entity("Transferciniz.API.Entities.Vehicle", b =>
@@ -585,13 +558,6 @@ namespace Transferciniz.API.Migrations
                     b.Property<double>("Longitude")
                         .HasColumnType("double precision");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Ordering")
-                        .HasColumnType("integer");
-
                     b.Property<Guid>("TripId")
                         .HasColumnType("uuid");
 
@@ -688,19 +654,11 @@ namespace Transferciniz.API.Migrations
 
             modelBuilder.Entity("Transferciniz.API.Entities.Trip", b =>
                 {
-                    b.HasOne("Transferciniz.API.Entities.AccountVehicle", "AccountVehicle")
-                        .WithMany()
-                        .HasForeignKey("AccountVehicleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Transferciniz.API.Entities.TripHeader", null)
                         .WithMany("Trips")
                         .HasForeignKey("TripHeaderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("AccountVehicle");
                 });
 
             modelBuilder.Entity("Transferciniz.API.Entities.TripExtraService", b =>

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Transferciniz.API.Commands.TripCommands;
 using Transferciniz.API.Entities;
 
 namespace Transferciniz.API
@@ -33,5 +34,8 @@ namespace Transferciniz.API
         public DbSet<ExtraService> ExtraServices { get; set; }
         public DbSet<VehicleSegment> VehicleSegments { get; set; }
         public DbSet<VehicleType> VehicleTypes { get; set; }
+        public DbSet<WayPoint> WayPoints { get; set; }
+        public DbSet<WayPointUser> WayPointUsers { get; set; }
+        public DbSet<TripHistory> TripHistories { get; set; }
     }
 }

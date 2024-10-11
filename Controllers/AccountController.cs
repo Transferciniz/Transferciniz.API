@@ -25,9 +25,6 @@ public class AccountController: ControllerBase
     public async Task<UploadProfilePictureCommandResponse> ChangeProfilePicture(UploadProfilePictureCommand request) => await _mediator.Send(request);
 
     [HttpGet]
-    public async Task<List<AccountVehicle>> Vehicles(GetAccountVehiclesQuery request) => await _mediator.Send(request);
-
-    [HttpGet]
     public async Task<List<MapTrackingResponse>> VehiclesForMap(GetAccountVehiclesForMapQuery request) => await _mediator.Send(request);
 
     [HttpGet]
@@ -37,6 +34,5 @@ public class AccountController: ControllerBase
     public async Task<List<ProfileLocationQueryResponse>> SearchProfileLocation([FromQuery]ProfileLocationQuery request) => await _mediator.Send(request);
 
     [HttpPost]
-    [AllowAnonymous]
     public async Task<AccountVehicle> AddVehicle(AddVehicleCommand request) => await _mediator.Send(request);
 }

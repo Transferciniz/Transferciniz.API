@@ -1,27 +1,42 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using NetTopologySuite.Geometries;
 using Transferciniz.API.Entities;
-using Transferciniz.API.Queries.TripQueries;
 using Transferciniz.API.Services;
 
 namespace Transferciniz.API.Commands.TripCommands;
 
 public class CreateTripCommand: IRequest<CreateTripCommandResponse>
 {
-    public List<CombinationPricePair> SelectedVehicleCombinations { get; set; }
-
-    public List<Waypoint> Waypoints { get; set; }
-    public DateTime StartDate { get; set; }
     public string Name { get; set; }
-    
+    public DateTime StartDate { get; set; }
+    public List<Guid> VehicleIds { get; set; }
+    public List<VehicleWaypointPair> VehicleRoutePlans { get; set; }
 }
 
-public class Waypoint
+public class VehicleWaypointPair
+{
+    public Guid VehicleId { get; set; }
+    public decimal TotalLenghOfRoad { get; set; }
+    public List<VehicleWaypoint> Waypoints { get; set; }
+}
+
+public class VehicleWaypoint
 {
     public double Latitude { get; set; }
+    public string Name { get; set; }
     public double Longitude { get; set; }
+    public int Ordering { get; set; }
+    public List<WaypointUser> Users { get; set; }
 }
+
+public class WaypointUser
+{
+    public Guid? UserId { get; set; }
+    public string Name { get; set; }
+    public string Surname { get; set; }
+}
+
+
 
 public class CreateTripCommandResponse
 {
@@ -41,7 +56,6 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, Creat
 
     public async Task<CreateTripCommandResponse> Handle(CreateTripCommand request, CancellationToken cancellationToken)
     {
-        var startCoordinate = new Point(request.Waypoints[0].Latitude, request.Waypoints[0].Longitude);
         var tripHeader = await _context.TripHeaders.AddAsync(new TripHeader
         {
             Id = Guid.NewGuid(),
@@ -50,10 +64,12 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, Creat
             AccountId = _userSession.Id,
             StartDate = request.StartDate.ToUniversalTime(),
             Status = TripStatus.WaitingApprove,
-            TotalCost = request.SelectedVehicleCombinations.Sum(x => x.TotalPrice),
-            TotalTripCost = request.SelectedVehicleCombinations.Sum(x => x.TotalPrice),
+            TotalCost = 0,
+            TotalTripCost = 0,
             TotalExtraServiceCost = 0,
         }, cancellationToken);
+        
+        
         await _context.Transactions.AddAsync(new Transaction
         {
             Id = Guid.NewGuid(),
@@ -62,42 +78,59 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, Creat
             UserId = _userSession.Id,
             TripId = tripHeader.Entity.Id,
         }, cancellationToken);
-        foreach (var combinationPricePair in request.SelectedVehicleCombinations)
+
+        var vehicleEntities = await _context.Vehicles
+            .Where(x => request.VehicleIds.Contains(x.Id))
+            .ToListAsync(cancellationToken: cancellationToken);
+        
+        foreach (var vehicleEntity in vehicleEntities)
         {
-            foreach (var vehicleUsagePair in combinationPricePair.Vehicles)
+            var plans = request.VehicleRoutePlans.Where(x => x.VehicleId == vehicleEntity.Id).ToList();
+            var accountVehicles = await _context.AccountVehicles
+                .Where(x => x.VehicleId == vehicleEntity.Id)
+                .ToListAsync(cancellationToken: cancellationToken);
+            foreach (var plan in plans)
             {
-                var vehicles = await _context.AccountVehicles
-                    .Where(x => x.VehicleId == vehicleUsagePair.Vehicle.Id)
-                    .Select(x => new
-                    {
-                        x.Id,
-                        Distance = startCoordinate.Distance(x.Location)
-                    })
-                    .OrderBy(x=> x.Distance)
-                    .Skip(0)
-                    .Take(vehicleUsagePair.Usage)
-                    .ToListAsync(cancellationToken: cancellationToken);
-                for (int i = 0; i < vehicleUsagePair.Usage; i++)
+                var accountVehicle = accountVehicles.First();
+                accountVehicles.RemoveAt(0);
+                var tripEntity = await _context.Trips.AddAsync(new Trip
                 {
-                    var vehicle = vehicles[0];
-                    vehicles.RemoveAt(0);
-                    await _context.Trips.AddAsync(new Trip
+                    Id = Guid.NewGuid(),
+                    TotalCost = (plan.TotalLenghOfRoad / 1000) * vehicleEntity.BasePrice,
+                    TotalTripCost = (plan.TotalLenghOfRoad / 1000) * vehicleEntity.BasePrice,
+                    StartDate = request.StartDate,
+                    TripHeaderId = tripHeader.Entity.Id,
+                    Fee = 0,
+                    DriverId = accountVehicle.AccountId,
+                    AccountVehicleId = accountVehicle.Id,
+                    TotalExtraServiceCost = 0,
+                    Status = TripStatus.Approved,
+                    TripExtraServices = new List<TripExtraService>(),
+                    WayPoints = new List<WayPoint>()
+                }, cancellationToken);
+                foreach (var waypoint in plan.Waypoints)
+                {
+                    var waypointEntity = await _context.WayPoints.AddAsync(new WayPoint
                     {
                         Id = Guid.NewGuid(),
-                        Fee = 0,
-                        WayPoints = request.Waypoints.Select(x =>
-                        {
-                            var factory = new GeometryFactory();
-                            var point =  factory.CreatePoint(new Coordinate(x.Latitude, x.Longitude));
-                            return point as Geometry;
-                        }).ToList(),
-                        TotalCost = combinationPricePair.TotalPrice / vehicleUsagePair.Usage,
-                        TotalTripCost = combinationPricePair.TotalPrice / vehicleUsagePair.Usage,
-                        StartDate = request.StartDate.ToUniversalTime(),
-                        TotalExtraServiceCost = combinationPricePair.TotalPrice / vehicleUsagePair.Usage,
-                        TripHeaderId = tripHeader.Entity.Id,
-                        CompanyVehicleId = vehicle.Id,
+                        Name = waypoint.Name,
+                        TripId = tripEntity.Entity.Id,
+                        Longitude = waypoint.Longitude,
+                        Latitude = waypoint.Latitude,
+                        Ordering = waypoint.Ordering,
+                        WayPointUsers = new List<WayPointUser>()
                     }, cancellationToken);
+                    foreach (var waypointUser in waypoint.Users)
+                    {
+                        await _context.WayPointUsers.AddAsync(new WayPointUser
+                        {
+                            Id = Guid.NewGuid(),
+                            AccountId = waypointUser.UserId,
+                            Name = waypointUser.Name,
+                            Surname = waypointUser.Surname,
+                            WayPointId = waypointEntity.Entity.Id
+                        }, cancellationToken);
+                    }
                 }
             }
         }
@@ -105,8 +138,7 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, Creat
         await _context.SaveChangesAsync(cancellationToken);
         return new CreateTripCommandResponse
         {
-           Id = tripHeader.Entity.Id
+            Id = tripHeader.Entity.Id
         };
-
     }
 }

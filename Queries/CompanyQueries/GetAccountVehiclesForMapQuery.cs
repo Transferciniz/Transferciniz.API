@@ -48,8 +48,8 @@ public class GetCompanyVehiclesForMapHandler: IRequestHandler<GetAccountVehicles
                 Name = x.Plate,
                 Type = MapEntityType.Vehicle,
                 Picture = string.Empty,
-                Latitude = x.Location.Coordinate.X,
-                Longitude = x.Location.Coordinate.Y
+                Latitude = x.Latitude,
+                Longitude = x.Longitude
             })
             .ToListAsync(cancellationToken: cancellationToken);
     }

@@ -19,6 +19,7 @@ public static class JwtHelper
             new Claim("sessionId", sessionId.ToString()),
             new Claim("profilePicture", account.ProfilePicture),
             new Claim("accountType", account.AccountType.ToString()),
+            new Claim("username", account.Username),
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));

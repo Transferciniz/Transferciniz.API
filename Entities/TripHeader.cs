@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Transferciniz.API.DTOs;
 
 namespace Transferciniz.API.Entities;
 
@@ -20,4 +21,12 @@ public class TripHeader
     public TripStatus Status { get; set; }
 
     public ICollection<Trip> Trips { get; set; }
+
+    public TripHeaderDto ToDto() => new()
+        {
+            Id = Id,
+            Name = Name,
+            Status = Status,
+            StartDate = StartDate
+        };
 }
