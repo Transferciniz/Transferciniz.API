@@ -101,7 +101,6 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, Creat
                     StartDate = request.StartDate,
                     TripHeaderId = tripHeader.Entity.Id,
                     Fee = 0,
-                    DriverId = accountVehicle.AccountId,
                     AccountVehicleId = accountVehicle.Id,
                     TotalExtraServiceCost = 0,
                     Status = TripStatus.Approved,

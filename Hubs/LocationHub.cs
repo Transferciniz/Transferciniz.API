@@ -21,7 +21,15 @@ public class LocationHub: Hub
 
     public async Task SendMessageToGroup(string groupName, string methodName, object data)
     {
-        await Clients.Groups(groupName).SendCoreAsync(methodName, [data]);
+        try
+        {
+            await Clients.Groups(groupName).SendCoreAsync(methodName, [data]);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
     }
 
     [SignalRMethod]

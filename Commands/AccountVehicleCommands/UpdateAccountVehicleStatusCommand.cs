@@ -40,13 +40,11 @@ public class UpdateAccountVehicleStatusCommandHandler: IRequestHandler<UpdateAcc
         var trip = await _context.Trips.FirstOrDefaultAsync(x => x.AccountVehicleId == accountVehicle.Id && x.Status == TripStatus.Live, cancellationToken: cancellationToken);
         if (trip is not null)
         {
-            await _locationHub.Clients.All.SendCoreAsync("onVehicleLocationChange", [
-                new
-                {
-                    request.Latitude, request.Longitude
-                }
-            ]);
-         
+            await _locationHub.SendMessageToGroup($"vehicle@{trip.Id}", "onVehicleLocationChange", new
+            {
+                request.Latitude, request.Longitude
+            });
+
         }
         
         return new Unit();
