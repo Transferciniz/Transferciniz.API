@@ -53,4 +53,9 @@ public class TripController: ControllerBase
     [HttpGet]
     public async Task<List<TripDto>> GetTripDetailsForCompany([FromQuery] GetTripDetailsForCompanyQuery request) => await _mediator.Send(request);
 
+    [HttpGet]
+    public async Task<List<TripHeaderDto>> GetTripHeadersForCustomer([FromQuery] GetTripHeadersForCustomerQuery request) => await _mediator.Send(request);
+
+    [HttpGet]
+    public async Task<List<TripDto>> GetTripDetailsForCustomer([FromQuery] GetTripDetailsForCustomerQuery request) => await _mediator.Send(request);
 }

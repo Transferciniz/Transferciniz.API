@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using NetTopologySuite.Geometries;
+using Skybrud.Essentials.Collections.Extensions;
 using Transferciniz.API.DTOs;
 
 namespace Transferciniz.API.Entities;
@@ -34,7 +35,7 @@ public class Trip
             StartDate = StartDate,
             VehicleName = $"{AccountVehicle.Vehicle.VehicleBrand.Name} {AccountVehicle.Vehicle.VehicleModel.Name}",
             VehiclePlate = AccountVehicle.Plate,
-            Waypoints = WayPoints.Select(x => x.ToDto()).ToList()
+            Waypoints = WayPoints.Select(x => x.ToDto()).OrderBy(x => x.Ordering).ToList()
         };
     }
 
@@ -61,6 +62,7 @@ public class WayPoint
             Longitude = Longitude,
             Latitude = Latitude,
             Name = Name,
+            Ordering = Ordering,
             Users = WayPointUsers.Select(x => x.ToDto()).ToList()
         };
     }
