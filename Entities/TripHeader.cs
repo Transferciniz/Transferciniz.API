@@ -26,7 +26,7 @@ public class TripHeader
         {
             Id = Id,
             Name = Name,
-            Status = Status,
+            Status = Trips.Select(x => x.Status).All(x => x == TripStatus.Live) ? TripStatus.Live : TripStatus.Approved,
             StartDate = StartDate
         };
 }

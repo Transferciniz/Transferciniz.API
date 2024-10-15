@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Transferciniz.API.Commands.AccountNotificationCommands;
 using Transferciniz.API.Entities;
 using Transferciniz.API.Services;
 
@@ -47,11 +48,13 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, Creat
 {
     private readonly TransportationContext _context;
     private readonly IUserSession _userSession;
+    private readonly IMediator _mediator;
 
-    public CreateTripCommandHandler(TransportationContext context, IUserSession userSession)
+    public CreateTripCommandHandler(TransportationContext context, IUserSession userSession, IMediator mediator)
     {
         _context = context;
         _userSession = userSession;
+        _mediator = mediator;
     }
 
     public async Task<CreateTripCommandResponse> Handle(CreateTripCommand request, CancellationToken cancellationToken)
@@ -117,6 +120,7 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, Creat
                         Longitude = waypoint.Longitude,
                         Latitude = waypoint.Latitude,
                         Ordering = waypoint.Ordering,
+                        IsCompleted = false,
                         WayPointUsers = new List<WayPointUser>()
                     }, cancellationToken);
                     foreach (var waypointUser in waypoint.Users)
@@ -127,7 +131,9 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, Creat
                             AccountId = waypointUser.UserId,
                             Name = waypointUser.Name,
                             Surname = waypointUser.Surname,
-                            WayPointId = waypointEntity.Entity.Id
+                            WayPointId = waypointEntity.Entity.Id,
+                            IsCame = false,
+                            WillCome = true
                         }, cancellationToken);
                     }
                 }
@@ -135,6 +141,11 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, Creat
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+        await _mediator.Send(new AddAccountNotificationCommand
+        {
+            AccountId = _userSession.Id,
+            Message = $"{tripHeader.Entity.Name} adlı transferiniz oluşturulmuştur, iyi yolculuklar dileriz."
+        }, cancellationToken);
         return new CreateTripCommandResponse
         {
             Id = tripHeader.Entity.Id

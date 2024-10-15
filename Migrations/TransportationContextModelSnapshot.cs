@@ -167,6 +167,30 @@ namespace Transferciniz.API.Migrations
                     b.ToTable("AccountMemberships");
                 });
 
+            modelBuilder.Entity("Transferciniz.API.Entities.AccountNotification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsViewed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AccountNotifications");
+                });
+
             modelBuilder.Entity("Transferciniz.API.Entities.AccountVehicle", b =>
                 {
                     b.Property<Guid>("Id")
@@ -579,6 +603,9 @@ namespace Transferciniz.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean");
+
                     b.Property<double>("Latitude")
                         .HasColumnType("double precision");
 
@@ -611,6 +638,9 @@ namespace Transferciniz.API.Migrations
                     b.Property<Guid?>("AccountId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsCame")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -622,7 +652,12 @@ namespace Transferciniz.API.Migrations
                     b.Property<Guid>("WayPointId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("WillCome")
+                        .HasColumnType("boolean");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
 
                     b.HasIndex("WayPointId");
 
@@ -803,11 +838,17 @@ namespace Transferciniz.API.Migrations
 
             modelBuilder.Entity("Transferciniz.API.Entities.WayPointUser", b =>
                 {
+                    b.HasOne("Transferciniz.API.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId");
+
                     b.HasOne("Transferciniz.API.Entities.WayPoint", null)
                         .WithMany("WayPointUsers")
                         .HasForeignKey("WayPointId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("Transferciniz.API.Entities.Account", b =>

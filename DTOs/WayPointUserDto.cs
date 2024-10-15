@@ -7,4 +7,6 @@ public class WayPointUserDto
     public string Surname { get; set; }
     public Guid? AccountId { get; set; }
     public string? ProfilePicture { get; set; }
+    public bool IsCame { get; set; }
+    public bool WillCome { get; set; }
 }

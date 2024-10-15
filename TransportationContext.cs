@@ -17,6 +17,8 @@ namespace Transferciniz.API
         public DbSet<AccountFile> AccountFiles { get; set; }
         public DbSet<AccountLocation> AccountLocations { get; set; }
         public DbSet<AccountVehicle> AccountVehicles { get; set; }
+
+        public DbSet<AccountNotification> AccountNotifications { get; set; }
         
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<VehicleBrand> VehicleBrands { get; set; }

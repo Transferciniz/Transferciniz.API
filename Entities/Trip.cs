@@ -52,6 +52,7 @@ public class WayPoint
     public double Longitude { get; set; }
     public string Name { get; set; }
     public int Ordering { get; set; }
+    public bool IsCompleted { get; set; }
     public ICollection<WayPointUser> WayPointUsers { get; set; }
 
     public WayPointDto ToDto()
@@ -79,6 +80,9 @@ public class WayPointUser
     public string Name { get; set; }
     public string Surname { get; set; }
 
+    public bool WillCome { get; set; }
+    public bool IsCame { get; set; }
+
     public WayPointUserDto ToDto()
     {
         return new WayPointUserDto
@@ -87,7 +91,9 @@ public class WayPointUser
             AccountId = AccountId,
             Name = Account?.Name ?? Name,
             Surname = Account?.Surname ?? Surname,
-            ProfilePicture = Account?.ProfilePicture ?? ""
+            ProfilePicture = Account?.ProfilePicture ?? "",
+            IsCame = IsCame,
+            WillCome = WillCome
         };
     }
     

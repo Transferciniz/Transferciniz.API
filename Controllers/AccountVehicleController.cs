@@ -23,7 +23,7 @@ public class AccountVehicleController: ControllerBase
     public async Task<AccountVehicle> GetAccountVehicle([FromQuery] GetAccountVehicleQuery request) => await _mediator.Send(request);
 
     [HttpPost]
-    public async Task<Unit> UpdateAccountVehicleStatus(UpdateAccountVehicleStatusCommand request) => await _mediator.Send(request);
+    public async Task<Unit> OnlineVehicle(UpdateAccountVehicleStatusOnlineCommand request) => await _mediator.Send(request);
 
     [HttpGet]
     public async Task<List<AccountVehicle>> GetMyVehicles([FromQuery]GetAccountVehiclesQuery request) => await _mediator.Send(request);

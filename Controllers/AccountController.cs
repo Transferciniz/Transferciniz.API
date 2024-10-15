@@ -37,4 +37,7 @@ public class AccountController: ControllerBase
 
     [HttpPost]
     public async Task<AccountVehicle> AddVehicle(AddVehicleCommand request) => await _mediator.Send(request);
+
+    [HttpGet]
+    public async Task<List<AccountNotification>> GetNotifications([FromQuery] GetNotificationsQuery request) => await _mediator.Send(request);
 }
