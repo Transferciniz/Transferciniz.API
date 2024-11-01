@@ -6,8 +6,6 @@ namespace Transferciniz.API.Queries.CompanyQueries;
 
 public class GetAccountVehiclesForMapQuery: IRequest<List<MapTrackingResponse>>
 {
-    public Guid CompanyId { get; set; }
-    public bool IncludeDrivers { get; set; }
 }
 
 
@@ -41,7 +39,7 @@ public class GetCompanyVehiclesForMapHandler: IRequestHandler<GetAccountVehicles
     public async Task<List<MapTrackingResponse>> Handle(GetAccountVehiclesForMapQuery request, CancellationToken cancellationToken)
     {
         return await _context.AccountVehicles
-            .Where(x => x.AccountId == (Guid.Empty == request.CompanyId ? _userSession.Id : request.CompanyId))
+            .Where(x => x.AccountId == _userSession.Id && x.Latitude != 0 && x.Longitude != 0)
             .Select(x => new MapTrackingResponse
             {
                 Description = $"{x.Plate} Plakalı Araç",

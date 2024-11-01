@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -20,6 +21,8 @@ public static class JwtHelper
             new Claim("profilePicture", account.ProfilePicture),
             new Claim("accountType", account.AccountType.ToString()),
             new Claim("username", account.Username),
+            new Claim("latitude", account.Latitude.ToString(CultureInfo.InvariantCulture)),
+            new Claim("longitude",account.Longitude.ToString(CultureInfo.InvariantCulture))
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));

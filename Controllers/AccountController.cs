@@ -27,7 +27,7 @@ public class AccountController: ControllerBase
     public async Task<Unit> UpdateLocation(UpdateLocationCommand request) => await _mediator.Send(request);
 
     [HttpGet]
-    public async Task<List<MapTrackingResponse>> VehiclesForMap(GetAccountVehiclesForMapQuery request) => await _mediator.Send(request);
+    public async Task<List<MapTrackingResponse>> VehiclesForMap([FromQuery]GetAccountVehiclesForMapQuery request) => await _mediator.Send(request);
 
     [HttpGet]
     public async Task<GetProfileQueryResponse> GetProfile(GetProfileQuery request) => await _mediator.Send(request);
