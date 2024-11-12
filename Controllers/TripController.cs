@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Transferciniz.API.Commands.TripCommands;
+using Transferciniz.API.Commands.WaypointCommands;
 using Transferciniz.API.DTOs;
 using Transferciniz.API.Entities;
 using Transferciniz.API.Queries.TripQueries;
@@ -45,8 +46,6 @@ public class TripController: ControllerBase
     [HttpPost]
     public async Task<Unit> StartTrip(StartTripCommand request) => await _mediator.Send(request);
 
-
-
     [HttpGet]
     public async Task<List<TripHeaderDto>> GetTripHeadersForCompany([FromQuery] GetTripHeadersForCompanyQuery request) => await _mediator.Send(request);
 
@@ -58,4 +57,10 @@ public class TripController: ControllerBase
 
     [HttpGet]
     public async Task<List<TripDto>> GetTripDetailsForCustomer([FromQuery] GetTripDetailsForCustomerQuery request) => await _mediator.Send(request);
+
+    [HttpPost]
+    public async Task<Unit> UpdateWaypoint(UpdateWaypointCommand request) => await _mediator.Send(request);
+
+    [HttpPost]
+    public async Task<Unit> FinishTrip(FinishTripCommand request) => await _mediator.Send(request);
 }
