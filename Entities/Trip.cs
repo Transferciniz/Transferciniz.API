@@ -33,6 +33,7 @@ public class Trip
         {
             Id = Id,
             StartDate = StartDate,
+            Status = Status,
             VehicleName = $"{AccountVehicle.Vehicle.VehicleBrand.Name} {AccountVehicle.Vehicle.VehicleModel.Name}",
             VehiclePlate = AccountVehicle.Plate,
             Waypoints = WayPoints.Select(x => x.ToDto()).OrderBy(x => x.Ordering).ToList()

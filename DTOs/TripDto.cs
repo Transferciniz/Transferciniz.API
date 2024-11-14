@@ -1,3 +1,5 @@
+using Transferciniz.API.Entities;
+
 namespace Transferciniz.API.DTOs;
 
 public class TripDto
@@ -7,4 +9,5 @@ public class TripDto
     public string VehicleName { get; set; }
     public string VehiclePlate { get; set; }
     public List<WayPointDto> Waypoints { get; set; }
+    public TripStatus Status { get; set; }
 }
