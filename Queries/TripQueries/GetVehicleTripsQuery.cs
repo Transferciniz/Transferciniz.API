@@ -27,7 +27,8 @@ public class GetVehicleTripsQueryHandler: IRequestHandler<GetVehicleTripsQuery, 
 
     public async Task<List<GetVehicleTripsQueryResponse>> Handle(GetVehicleTripsQuery request, CancellationToken cancellationToken)
     {
-        var trips =  await _context.Trips.Where(x => x.AccountVehicleId == request.AccountVehicleId)
+        var statusQuery = new List<TripStatus>([TripStatus.Approved, TripStatus.Live]);
+        var trips =  await _context.Trips.Where(x => x.AccountVehicleId == request.AccountVehicleId && statusQuery.Contains(x.Status) )
             .Include(x => x.AccountVehicle)
             .ThenInclude(x => x.Vehicle)
             .ThenInclude(x => x.VehicleBrand)
