@@ -25,6 +25,7 @@ public class GetNotificationsQueryHandler: IRequestHandler<GetNotificationsQuery
     {
         return await _context.AccountNotifications
             .Where(x => x.AccountId == _userSession.Id)
+            .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(cancellationToken: cancellationToken);
     }
 }

@@ -30,7 +30,8 @@ public class AccountController: ControllerBase
     public async Task<List<MapTrackingResponse>> VehiclesForMap([FromQuery]GetAccountVehiclesForMapQuery request) => await _mediator.Send(request);
 
     [HttpGet]
-    public async Task<GetProfileQueryResponse> GetProfile(GetProfileQuery request) => await _mediator.Send(request);
+    [AllowAnonymous]
+    public async Task<GetProfileQueryResponse> GetProfile([FromQuery]GetProfileQuery request) => await _mediator.Send(request);
 
     [HttpGet]
     public async Task<List<ProfileLocationQueryResponse>> SearchProfileLocation([FromQuery]ProfileLocationQuery request) => await _mediator.Send(request);

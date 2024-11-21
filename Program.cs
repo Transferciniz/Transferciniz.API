@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using Transferciniz.API;
 using Transferciniz.API.Hubs;
 using Transferciniz.API.Services;
@@ -12,6 +13,14 @@ using Transferciniz.API.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Host.UseSerilog((context, services, configuration) =>
+{
+    configuration
+        .ReadFrom.Configuration(context.Configuration) // appsettings.json veya diğer kaynakları okur
+        .ReadFrom.Services(services)                   // Dependency Injection kullanır
+        .WriteTo.Console();                            // Konsola logları yazdırır
+});
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

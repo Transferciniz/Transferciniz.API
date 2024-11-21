@@ -5,6 +5,7 @@ using Transferciniz.API.Commands.TripCommands;
 using Transferciniz.API.Commands.WaypointCommands;
 using Transferciniz.API.DTOs;
 using Transferciniz.API.Entities;
+using Transferciniz.API.Helpers;
 using Transferciniz.API.Queries.TripQueries;
 using Transferciniz.API.Queries.VehicleFiltersQueries;
 
@@ -63,4 +64,7 @@ public class TripController: ControllerBase
 
     [HttpPost]
     public async Task<Unit> FinishTrip(FinishTripCommand request) => await _mediator.Send(request);
+
+    [HttpGet]
+    public async Task<PagingResult<List<TripHeaderDto>>> GetTripHistory([FromQuery]GetTripHistoryQuery request) => await _mediator.Send(request);
 }
