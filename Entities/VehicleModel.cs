@@ -9,7 +9,7 @@ public class VehicleModel
     public string Name { get; set; }
     public int Capacity { get; set; }
     public int ExtraCapacity { get; set; }
-    public int TotalCapacity => Capacity + ExtraCapacity;
+    public string Photo { get; set; }
     
     public Guid VehicleBrandId { get; set; }
 

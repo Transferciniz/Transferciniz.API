@@ -12,6 +12,7 @@ public class GetVehiclesQueryResponse
 {
     public Guid Id { get; set; }
     public string Name { get; set; }
+    public string Photo { get; set; }
     public int Capacity { get; set; }
 }
 
@@ -33,7 +34,8 @@ public class GetVehiclesQueryHandler: IRequestHandler<GetVehiclesQuery, List<Get
             {
                 Id = x.Id,
                 Capacity = x.VehicleModel.Capacity,
-                Name = $"{x.VehicleBrand.Name} {x.VehicleModel.Name}"
+                Name = $"{x.VehicleBrand.Name} {x.VehicleModel.Name}",
+                Photo = x.VehicleModel.Photo
             })
             .ToListAsync(cancellationToken: cancellationToken);
     }

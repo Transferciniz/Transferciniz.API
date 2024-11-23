@@ -17,5 +17,5 @@ public class VehicleModelController: ControllerBase
     }
 
     [HttpPost]
-    public async Task<VehicleModel> Create(CreateVehicleModelCommand request) => await _mediator.Send(request);
+    public async Task<VehicleModel> Create([FromForm]CreateVehicleModelCommand request) => await _mediator.Send(request);
 }
