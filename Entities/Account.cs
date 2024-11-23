@@ -6,6 +6,8 @@ public class Account
 {
     [Key]
     public Guid Id { get; set; }
+
+    public Guid? ParentAccountId { get; set; }
     public AccountType AccountType { get; set; }
     public double Latitude { get; set; }
     public double Longitude { get; set; }
@@ -24,7 +26,6 @@ public class Account
     
     public ICollection<AccountLocation> AccountLocations { get; set; }
     public ICollection<AccountFile> AccountFiles { get; set; }
-    public ICollection<AccountMembership> AccountMemberships { get; set; }
     public ICollection<AccountVehicle> AccountVehicles { get; set; }
     
 }

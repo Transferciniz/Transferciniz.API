@@ -14,6 +14,7 @@ public class RegisterCommand: IRequest<RegisterCommandResponse>
     public AccountType AccountType { get; set; }
     public string TaxNumber { get; set; }
     public string InvoiceAddress { get; set; }
+    public Guid? ParentAccountId { get; set; }
 }
 
 public class RegisterCommandResponse
@@ -37,6 +38,7 @@ public class RegisterUserCommandHandler: IRequestHandler<RegisterCommand, Regist
         var user = await _context.Accounts.AddAsync(new Account
         {
             Id = Guid.NewGuid(),
+            ParentAccountId = request.ParentAccountId,
             Name = request.Name,
             Surname = request.Surname,
             Username = request.Username,

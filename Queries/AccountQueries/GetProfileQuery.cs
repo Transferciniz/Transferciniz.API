@@ -35,9 +35,7 @@ public class GetMeQueryHandler: IRequestHandler<GetProfileQuery, GetProfileQuery
             .Accounts
             .FirstAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
         
-        var totalMemberhips = await _context
-            .AccountMemberships
-            .CountAsync(x => x.AccountId == request.Id, cancellationToken: cancellationToken);
+    
 
         var totalTrips = await _context
             .TripHeaders
@@ -50,7 +48,7 @@ public class GetMeQueryHandler: IRequestHandler<GetProfileQuery, GetProfileQuery
             AccountType = account.AccountType,
             ProfilePicture = account.ProfilePicture,
             Username = account.Username,
-            TotalMemberships = totalMemberhips,
+            TotalMemberships = 0,
             TotalTrip = totalTrips
         };
     }

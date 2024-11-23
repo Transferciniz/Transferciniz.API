@@ -13,7 +13,6 @@ namespace Transferciniz.API
         public DbSet<Session> Sessions { get; set; }
 
         public DbSet<Account> Accounts { get; set; }
-        public DbSet<AccountMembership> AccountMemberships { get; set; }
         public DbSet<AccountFile> AccountFiles { get; set; }
         public DbSet<AccountLocation> AccountLocations { get; set; }
         public DbSet<AccountVehicle> AccountVehicles { get; set; }
