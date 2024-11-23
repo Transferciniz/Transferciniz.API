@@ -28,8 +28,8 @@ public class GetVehiclesQueryHandler: IRequestHandler<GetVehiclesQuery, List<Get
     public async Task<List<GetVehiclesQueryResponse>> Handle(GetVehiclesQuery request, CancellationToken cancellationToken)
     {
         return await _context.Vehicles
-            .Include(x => x.VehicleModel)
             .Include(x => x.VehicleBrand)
+            .ThenInclude(x => x.VehicleModels)
             .Select(x => new GetVehiclesQueryResponse
             {
                 Id = x.Id,
