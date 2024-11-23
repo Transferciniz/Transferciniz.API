@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using NetTopologySuite.Geometries;
+using Transferciniz.API.DTOs;
 
 namespace Transferciniz.API.Entities;
 
@@ -21,6 +22,18 @@ public class AccountVehicle
     public ICollection<VehicleExtraService> VehicleExtraServices { get; set; }
     public ICollection<VehicleSegmentFilter> VehicleSegmentFilters { get; set; }
     public ICollection<VehicleTypeFilter> VehicleTypeFilters { get; set; }
+
+    public AccountVehicleDto ToDto() =>
+        new()
+        {
+            Id = Id,
+            Latitude = Latitude,
+            Longitude = Longitude,
+            Name = $"{Vehicle.VehicleBrand.Name} {Vehicle.VehicleModel.Name}",
+            Plate = Plate,
+            Status = Status,
+            Photo = Vehicle.VehicleModel.Photo
+        };
 }
 
 public enum VehicleStatus

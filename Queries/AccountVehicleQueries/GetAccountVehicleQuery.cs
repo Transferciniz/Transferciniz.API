@@ -1,15 +1,16 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Transferciniz.API.DTOs;
 using Transferciniz.API.Entities;
 
 namespace Transferciniz.API.Queries.AccountVehicleQueries;
 
-public class GetAccountVehicleQuery: IRequest<AccountVehicle>
+public class GetAccountVehicleQuery: IRequest<AccountVehicleDto>
 {
     public Guid Id { get; set; }
 }
 
-public class GetAccountVehicleQueryHandler : IRequestHandler<GetAccountVehicleQuery, AccountVehicle>
+public class GetAccountVehicleQueryHandler : IRequestHandler<GetAccountVehicleQuery, AccountVehicleDto>
 {
     private readonly TransportationContext _context;
 
@@ -18,15 +19,15 @@ public class GetAccountVehicleQueryHandler : IRequestHandler<GetAccountVehicleQu
         _context = context;
     }
 
-    public async Task<AccountVehicle> Handle(GetAccountVehicleQuery request, CancellationToken cancellationToken)
+    public async Task<AccountVehicleDto> Handle(GetAccountVehicleQuery request, CancellationToken cancellationToken)
     {
-        return await _context.AccountVehicles
+        return (await _context.AccountVehicles
             .Where(x => x.Id == request.Id)
             .Include(x => x.Vehicle)
             .ThenInclude(x => x.VehicleBrand)
-
+            
             .Include(x => x.Vehicle)
             .ThenInclude(x => x.VehicleModel)
-            .FirstAsync(cancellationToken: cancellationToken);
+            .FirstAsync(cancellationToken: cancellationToken)).ToDto();
     }
 }
