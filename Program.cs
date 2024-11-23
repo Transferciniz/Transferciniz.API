@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Transferciniz.API;
 using Transferciniz.API.Hubs;
+using Transferciniz.API.Notifications;
 using Transferciniz.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +38,7 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(x =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(x => { x.AddSignalRSwaggerGen(); });
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+builder.Services.AddTransient<INotificationPublisher, ParallelNotificationPublisher>(); 
 
 builder.Services.AddAuthentication(options =>
     {

@@ -11,6 +11,7 @@ public class AccountVehicle
     public Guid Id { get; set; }
     public string Plate { get; set; }
     public Guid AccountId { get; set; }
+    public Guid? DriverId { get; set; }
     
     public Guid VehicleId { get; set; }
     public Vehicle Vehicle { get; set; }
