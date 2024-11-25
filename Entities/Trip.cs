@@ -32,6 +32,7 @@ public class Trip
         return new TripDto
         {
             Id = Id,
+            AccountVehicleId = AccountVehicle.Id,
             StartDate = StartDate,
             Status = Status,
             VehicleName = $"{AccountVehicle.Vehicle.VehicleBrand.Name} {AccountVehicle.Vehicle.VehicleModel.Name}",
