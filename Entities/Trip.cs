@@ -41,6 +41,23 @@ public class Trip
         };
     }
 
+    public TripDto ToDto(Account driver)
+    {
+        return new TripDto
+        {
+            Id = Id,
+            AccountVehicleId = AccountVehicle.Id,
+            StartDate = StartDate,
+            Status = Status,
+            VehicleName = $"{AccountVehicle.Vehicle.VehicleBrand.Name} {AccountVehicle.Vehicle.VehicleModel.Name}",
+            VehiclePlate = AccountVehicle.Plate,
+            VehiclePhoto = AccountVehicle.Vehicle.VehicleModel.Photo,
+            Waypoints = WayPoints.Select(x => x.ToDto()).OrderBy(x => x.Ordering).ToList(),
+            DriverName = $"{driver.Name} {driver.Surname}",
+            DriverPhoto = driver.ProfilePicture
+        };
+    }
+
 }
 
 

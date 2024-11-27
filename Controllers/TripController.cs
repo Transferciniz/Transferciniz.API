@@ -57,7 +57,7 @@ public class TripController: ControllerBase
     public async Task<List<TripHeaderDto>> GetTripHeadersForCustomer([FromQuery] GetTripHeadersForCustomerQuery request) => await _mediator.Send(request);
 
     [HttpGet]
-    public async Task<List<TripDto>> GetTripDetailsForCustomer([FromQuery] GetTripDetailsForCustomerQuery request) => await _mediator.Send(request);
+    public async Task<TripDto> GetTripDetailsForCustomer([FromQuery] GetTripDetailsForCustomerQuery request) => await _mediator.Send(request);
 
     [HttpPost]
     public async Task<Unit> UpdateWaypoint(UpdateWaypointCommand request) => await _mediator.Send(request);
