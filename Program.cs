@@ -19,7 +19,7 @@ builder.Host.UseSerilog((context, services, configuration) =>
 {
     configuration
         .ReadFrom.Configuration(context.Configuration) // appsettings.json veya diğer kaynakları okur
-        .ReadFrom.Services(services)                   // Dependency Injection kullanır
+        //.ReadFrom.Services(services) // Dependency Injection kullanır
         .WriteTo.Console();                            // Konsola logları yazdırır
 });
 
