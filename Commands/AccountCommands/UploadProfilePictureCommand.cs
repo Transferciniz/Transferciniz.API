@@ -1,5 +1,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Processing;
 using Transferciniz.API.Helpers;
 using Transferciniz.API.Services;
 
@@ -32,7 +35,7 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
 
     public async Task<UploadProfilePictureCommandResponse> Handle(UploadProfilePictureCommand request, CancellationToken cancellationToken)
     {
-        var url = await _s3Service.UploadFileToSpacesAsync(ConvertBase64ToJpg(request.File, $"{Guid.NewGuid()}.jpg"));
+        var url = await _s3Service.UploadFileToSpacesAsync(await ConvertImage(request.File, $"{Guid.NewGuid()}.jpg"));
         var user = await _context.Accounts.Where(x => x.Id == _session.Id).FirstAsync(cancellationToken: cancellationToken);
         var session = await _context.Sessions.FirstAsync(x => x.AccountId == _session.Id, cancellationToken: cancellationToken);
         user.ProfilePicture = url;
@@ -45,7 +48,24 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
         };
     }
     
-    public static IFormFile ConvertBase64ToJpg(string base64String, string fileName)
+    public static async Task<IFormFile> ConvertImage(string base64String, string fileName)
+    {
+        var imageBytes = await ConvertBase64AndProcessImageAsync(base64String);
+
+        // MemoryStream oluştur ve byte dizisini buraya yaz
+        var stream = new MemoryStream(imageBytes);
+
+        // IFormFile oluştur
+        var formFile = new FormFile(stream, 0, stream.Length, "file", fileName)
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "image/jpeg" // veya ilgili içerik tipi (örn. "image/png")
+        };
+
+        return formFile;
+    }
+
+    private static async Task<byte[]> ConvertBase64AndProcessImageAsync(string base64String, int maxWidth = 1080, int maxHeight = 1920, int quality = 60)
     {
         // Base64 header'ını kaldır (örneğin: data:image/jpeg;base64,)
         if (base64String.StartsWith("data:image/jpeg;base64,"))
@@ -61,15 +81,21 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
         byte[] imageBytes = Convert.FromBase64String(base64String);
 
         // MemoryStream oluştur ve byte dizisini buraya yaz
-        var stream = new MemoryStream(imageBytes);
+        using var stream = new MemoryStream(imageBytes);
+        // ImageSharp ile resmi açın
+        using var image = await Image.LoadAsync(stream);
+        // Boyutlandırma (maksimum genişlik ve yükseklik)
+        image.Mutate(x => x.Resize(maxWidth, maxHeight));
 
-        // IFormFile oluştur
-        var formFile = new FormFile(stream, 0, stream.Length, "file", fileName)
+        // Resmi sıkıştırma (JPEG formatında ve belirli kalite ile)
+        var encoder = new JpegEncoder()
         {
-            Headers = new HeaderDictionary(),
-            ContentType = "image/jpeg" // veya ilgili içerik tipi (örn. "image/png")
+            Quality = quality // JPEG kalitesi (1-100 arası)
         };
 
-        return formFile;
+        // Sıkıştırılmış resmi belleğe yaz
+        using var outputStream = new MemoryStream();
+        await image.SaveAsync(outputStream, encoder);
+        return outputStream.ToArray(); // Sıkıştırılmış resmi byte dizisi olarak döndür
     }
 }
