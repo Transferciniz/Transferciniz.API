@@ -67,4 +67,7 @@ public class TripController: ControllerBase
 
     [HttpGet]
     public async Task<PagingResult<List<TripHeaderDto>>> GetTripHistory([FromQuery]GetTripHistoryQuery request) => await _mediator.Send(request);
+
+    [HttpPost]
+    public async Task<Unit> UpdateUserWillCome(UpdateUserWillComeCommand request) => await _mediator.Send(request);
 }

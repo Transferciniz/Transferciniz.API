@@ -48,8 +48,13 @@ public class GetTripHeadersForCustomerQueryHandler: IRequestHandler<GetTripHeade
             .ThenInclude(x => x.Vehicle)
             .ThenInclude(x => x.VehicleModel)
             .Where(x => tripHeaderIds.Contains(x.Id))
+            
+            .Include(x => x.Trips)
+            .ThenInclude(x => x.WayPoints)
+            .ThenInclude(x => x.WayPointUsers)
+            
             .ToListAsync(cancellationToken: cancellationToken);
 
-        return tripHeaders.Select(x => x.ToCustomerDto()).ToList();
+        return tripHeaders.Select(x => x.ToCustomerDto(_userSession.Id)).OrderBy(x => x.StartDate).ToList();
     }
 }
