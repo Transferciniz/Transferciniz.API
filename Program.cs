@@ -38,7 +38,7 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(x =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(x => { x.AddSignalRSwaggerGen(); });
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-builder.Services.AddTransient<INotificationPublisher, ParallelNotificationPublisher>(); 
+//builder.Services.AddTransient<INotificationPublisher, ParallelNotificationPublisher>(); 
 
 builder.Services.AddAuthentication(options =>
     {

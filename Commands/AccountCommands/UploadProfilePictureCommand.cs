@@ -84,8 +84,32 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
         using var stream = new MemoryStream(imageBytes);
         // ImageSharp ile resmi açın
         using var image = await Image.LoadAsync(stream);
-        // Boyutlandırma (maksimum genişlik ve yükseklik)
-        image.Mutate(x => x.Resize(maxWidth, maxHeight));
+
+        // Orantılı yeniden boyutlandırma için yeni genişlik ve yükseklik hesaplama
+        int originalWidth = image.Width;
+        int originalHeight = image.Height;
+
+        double aspectRatio = (double)originalWidth / originalHeight;
+
+        int newWidth = originalWidth;
+        int newHeight = originalHeight;
+
+        if (originalWidth > maxWidth || originalHeight > maxHeight)
+        {
+            if (aspectRatio > 1) // Yatay resim
+            {
+                newWidth = maxWidth;
+                newHeight = (int)(maxWidth / aspectRatio);
+            }
+            else // Dikey resim veya kare
+            {
+                newHeight = maxHeight;
+                newWidth = (int)(maxHeight * aspectRatio);
+            }
+        }
+
+        // Boyutlandırma (en-boy oranını koruyarak)
+        image.Mutate(x => x.Resize(newWidth, newHeight));
 
         // Resmi sıkıştırma (JPEG formatında ve belirli kalite ile)
         var encoder = new JpegEncoder()
@@ -97,5 +121,6 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
         using var outputStream = new MemoryStream();
         await image.SaveAsync(outputStream, encoder);
         return outputStream.ToArray(); // Sıkıştırılmış resmi byte dizisi olarak döndür
+
     }
 }
