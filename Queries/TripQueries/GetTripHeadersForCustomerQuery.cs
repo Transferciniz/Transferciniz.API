@@ -44,9 +44,12 @@ public class GetTripHeadersForCustomerQueryHandler: IRequestHandler<GetTripHeade
 
         var tripHeaders = await _context.TripHeaders
             .Include(x => x.Trips)
+            .ThenInclude(x => x.AccountVehicle)
+            .ThenInclude(x => x.Vehicle)
+            .ThenInclude(x => x.VehicleModel)
             .Where(x => tripHeaderIds.Contains(x.Id))
             .ToListAsync(cancellationToken: cancellationToken);
 
-        return tripHeaders.Select(x => x.ToDto()).ToList();
+        return tripHeaders.Select(x => x.ToCustomerDto()).ToList();
     }
 }

@@ -29,4 +29,14 @@ public class TripHeader
             Status = Trips.Select(x => x.Status).All(x => x == TripStatus.Live) ? TripStatus.Live : TripStatus.Approved,
             StartDate = StartDate
         };
+    
+    public TripHeaderDto ToCustomerDto() => new()
+    {
+        Id = Id,
+        Name = Name,
+        Status = Trips.Select(x => x.Status).All(x => x == TripStatus.Live) ? TripStatus.Live : TripStatus.Approved,
+        StartDate = StartDate,
+        Plate = Trips.First().AccountVehicle.Plate,
+        VehiclePhoto = Trips.First().AccountVehicle.Vehicle.VehicleModel.Photo
+    };
 }
