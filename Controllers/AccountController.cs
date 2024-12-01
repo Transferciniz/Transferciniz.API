@@ -13,7 +13,7 @@ namespace Transferciniz.API.Controllers;
 
 [ApiController]
 [Route("/[controller]/[action]")]
-[Authorize]
+[Authorize(Policy = "SessionValidation")]
 public class AccountController: ControllerBase
 {
     private readonly IMediator _mediator;

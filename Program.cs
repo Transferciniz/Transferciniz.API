@@ -3,10 +3,12 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Transferciniz.API;
+using Transferciniz.API.Helpers;
 using Transferciniz.API.Hubs;
 using Transferciniz.API.Notifications;
 using Transferciniz.API.Services;
@@ -59,10 +61,15 @@ builder.Services.AddAuthentication(options =>
             ClockSkew = TimeSpan.Zero // Token geçerlilik süresini daha hassas kontrol eder
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("SessionValidation", policy =>
+        policy.Requirements.Add(new SessionRequirement()));
+});
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IUserSession, UserSession>();
+builder.Services.AddScoped<IAuthorizationHandler, SessionRequirementHandler>();
 builder.Services.AddTransient<IS3Service, S3Service>();
 builder.Services.AddSingleton<LocationHub>();
 builder.Services.AddDbContext<TransportationContext>(x =>
