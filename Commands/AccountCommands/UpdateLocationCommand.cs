@@ -32,7 +32,7 @@ public class UpdateLocationCommandHandler: IRequestHandler<UpdateLocationCommand
         
         if (account is null) return Unit.Value;
         
-        _logger.LogInformation($"{_session.Name} {_session.Surname} Lokasyon Güncellemesi | LAT: {request.Latitude} LNG: {request.Longitude}");
+        _logger.LogWarning($"{_session.Name} {_session.Surname} Lokasyon Güncellemesi | LAT: {request.Latitude} LNG: {request.Longitude}");
         
         var notification = new UserLocationChangedNotification
         {
