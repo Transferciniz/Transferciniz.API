@@ -39,13 +39,12 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginCommandRes
             throw new Exception("Mail yada parolanız hatalı");
         }
 
-        var session = await _context.Sessions.FirstOrDefaultAsync(x => x.AccountId == account.Id,
-            cancellationToken: cancellationToken);
-        if (session is not null)
+        var sessions = await _context.Sessions.Where(x => x.AccountId == account.Id).ToListAsync(cancellationToken: cancellationToken);
+        foreach (var session in sessions)
         {
             _context.Sessions.Remove(session);
-            await _context.SaveChangesAsync(cancellationToken);
         }
+        await _context.SaveChangesAsync(cancellationToken);
 
         var newSession = await _context.Sessions.AddAsync(new Session
         {
