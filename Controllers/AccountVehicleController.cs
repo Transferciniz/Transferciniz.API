@@ -5,6 +5,7 @@ using Transferciniz.API.Commands.AccountVehicleCommands;
 using Transferciniz.API.Commands.AccountVehicleProblemCommands;
 using Transferciniz.API.DTOs;
 using Transferciniz.API.Entities;
+using Transferciniz.API.Queries.AccountVehicleProblemQueries;
 using Transferciniz.API.Queries.AccountVehicleQueries;
 
 namespace Transferciniz.API.Controllers;
@@ -35,4 +36,7 @@ public class AccountVehicleController: ControllerBase
 
     [HttpPost]
     public async Task<Unit> UpdateProblem(UpdateAccountVehicleProblemCommand request) => await _mediator.Send(request);
+
+    [HttpGet]
+    public async Task<List<AccountVehicleProblem>> GetProblems([FromQuery] GetAccountVehicleProblemsQuery request) => await _mediator.Send(request);
 }

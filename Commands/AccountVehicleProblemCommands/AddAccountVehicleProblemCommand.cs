@@ -29,7 +29,7 @@ public class AddAccountVehicleProblemCommandHanlder: IRequestHandler<AddAccountV
             AccountVehicleId = request.AccountVehicleId,
             Status = AccountVehicleProblemStatus.Pending,
             Message = request.Message,
-            DriverId = _userSession.Id,
+            AccountId = _userSession.Id,
             CreatedAt = DateTime.UtcNow,
         }, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);

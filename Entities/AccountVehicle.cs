@@ -52,7 +52,8 @@ public class AccountVehicleProblem
 {
     public Guid Id { get; set; }
     public Guid AccountVehicleId { get; set; }
-    public Guid DriverId { get; set; }
+    public Guid AccountId { get; set; }
+    public Account Account { get; set; }
     public string Message { get; set; }
     public AccountVehicleProblemStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
