@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Transferciniz.API.Commands.AccountVehicleCommands;
+using Transferciniz.API.Commands.AccountVehicleProblemCommands;
 using Transferciniz.API.DTOs;
 using Transferciniz.API.Entities;
 using Transferciniz.API.Queries.AccountVehicleQueries;
@@ -28,4 +29,10 @@ public class AccountVehicleController: ControllerBase
 
     [HttpGet]
     public async Task<List<AccountVehicle>> GetMyVehicles([FromQuery]GetAccountVehiclesQuery request) => await _mediator.Send(request);
+
+    [HttpPost]
+    public async Task<Unit> AddProblem(AddAccountVehicleProblemCommand request) => await _mediator.Send(request);
+
+    [HttpPost]
+    public async Task<Unit> UpdateProblem(UpdateAccountVehicleProblemCommand request) => await _mediator.Send(request);
 }

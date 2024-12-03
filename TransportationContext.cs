@@ -38,5 +38,7 @@ namespace Transferciniz.API
         public DbSet<WayPoint> WayPoints { get; set; }
         public DbSet<WayPointUser> WayPointUsers { get; set; }
         public DbSet<TripHistory> TripHistories { get; set; }
+        public DbSet<AccountVehicleProblem> AccountVehicleProblems { get; set; }
+        public DbSet<AccountVehicleProblemHistory> AccountVehicleProblemHistories { get; set; }
     }
 }
