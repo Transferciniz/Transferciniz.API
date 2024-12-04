@@ -34,7 +34,11 @@ public class TripHeader
     {
         Id = Id,
         Name = Name,
-        Status = Trips.Select(x => x.Status).All(x => x == TripStatus.Live) ? TripStatus.Live : TripStatus.Approved,
+        Status = Trips
+            .FirstOrDefault(x => x.WayPoints
+                .Any(y => y.WayPointUsers
+                    .Any(w => w.AccountId == userId)))
+            !.Status ,
         StartDate = StartDate,
         Plate = Trips.First().AccountVehicle.Plate,
         VehiclePhoto = Trips.First().AccountVehicle.Vehicle.VehicleModel.Photo,
