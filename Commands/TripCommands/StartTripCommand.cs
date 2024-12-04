@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Transferciniz.API.Commands.AccountNotificationCommands;
 using Transferciniz.API.Entities;
+using Transferciniz.API.Hubs;
 using Transferciniz.API.Services;
 
 namespace Transferciniz.API.Commands.TripCommands;
@@ -16,12 +17,14 @@ public class StartTripCommandHandler: IRequestHandler<StartTripCommand, Unit>
     private readonly TransportationContext _context;
     private readonly IUserSession _userSession;
     private readonly IMediator _mediator;
+    private readonly LocationHub _locationHub;
 
-    public StartTripCommandHandler(TransportationContext context, IUserSession userSession, IMediator mediator)
+    public StartTripCommandHandler(TransportationContext context, IUserSession userSession, IMediator mediator, LocationHub locationHub)
     {
         _context = context;
         _userSession = userSession;
         _mediator = mediator;
+        _locationHub = locationHub;
     }
 
     public async Task<Unit> Handle(StartTripCommand request, CancellationToken cancellationToken)
@@ -60,6 +63,7 @@ public class StartTripCommandHandler: IRequestHandler<StartTripCommand, Unit>
                 AccountId = (Guid)accountId,
                 Message = $"Aracınız, {_userSession.Name} {_userSession.Surname} şoförlüğünde {trip.AccountVehicle.Plate} plakalı araçla yola çıkmıştır."
             }, cancellationToken);
+            await _locationHub.SendMessageToGroup($"account@{accountId}", "onTripStatusChange", new { });
         }
 
         var companyAccountId = await _context.Accounts.Select(x => x.Id).FirstAsync(x => x == trip.AccountVehicle.AccountId, cancellationToken: cancellationToken);
