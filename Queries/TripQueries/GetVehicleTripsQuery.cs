@@ -39,6 +39,7 @@ public class GetVehicleTripsQueryHandler: IRequestHandler<GetVehicleTripsQuery, 
             
             .Include(x => x.WayPoints)
             .ThenInclude(x => x.WayPointUsers)
+            .ThenInclude(x => x.Account)
             .OrderBy(x => x.StartDate)
             .ToListAsync(cancellationToken: cancellationToken);
 
