@@ -49,7 +49,7 @@ public class StartTripCommandHandler: IRequestHandler<StartTripCommand, Unit>
             Id = Guid.NewGuid(),
             TripId = trip.Id,
             DateTime = DateTime.UtcNow,
-            Message = $"Transfer ${_userSession.Name} ${_userSession.Surname} tarafından başlatıldı."
+            Message = $"Transfer {_userSession.Name} {_userSession.Surname} tarafından başlatıldı."
         }, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
