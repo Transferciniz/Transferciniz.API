@@ -27,6 +27,7 @@ public class StartTripCommandHandler: IRequestHandler<StartTripCommand, Unit>
     public async Task<Unit> Handle(StartTripCommand request, CancellationToken cancellationToken)
     {
         var trip = await _context.Trips
+            .Include(x => x.AccountVehicle)
             .Include(x => x.WayPoints)
             .ThenInclude(x => x.WayPointUsers)
             .FirstAsync(x => x.Id == request.TripId, cancellationToken: cancellationToken);
@@ -34,16 +35,18 @@ public class StartTripCommandHandler: IRequestHandler<StartTripCommand, Unit>
         trip.Status = TripStatus.Live;
         trip.DriverId = _userSession.Id;
         _context.Trips.Update(trip);
+    
+        
         var tripHeader = await _context.TripHeaders.FirstAsync(x => x.Id == trip.TripHeaderId, cancellationToken: cancellationToken);
         tripHeader.Status = TripStatus.Live;
         _context.TripHeaders.Update(tripHeader);
-        await _context.SaveChangesAsync(cancellationToken);
+        
         await _context.TripHistories.AddAsync(new TripHistory
         {
             Id = Guid.NewGuid(),
             TripId = trip.Id,
             DateTime = DateTime.UtcNow,
-            Message = "Transfer sürücü tarafından başlatıldı."
+            Message = $"Transfer ${_userSession.Name} ${_userSession.Surname} tarafından başlatıldı."
         }, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -55,9 +58,16 @@ public class StartTripCommandHandler: IRequestHandler<StartTripCommand, Unit>
             await _mediator.Send(new AddAccountNotificationCommand()
             {
                 AccountId = (Guid)accountId,
-                Message = "Transferiniz başlamış, aracınız yola çıkmıştır. Aracınızın tahmini varış süresini canlı olarak takip edebilirsiniz."
+                Message = $"Aracınız, {_userSession.Name} {_userSession.Surname} şoförlüğünde {trip.AccountVehicle.Plate} plakalı araçla yola çıkmıştır."
             }, cancellationToken);
         }
+
+        var companyAccountId = await _context.Accounts.Select(x => x.Id).FirstAsync(x => x == trip.AccountVehicle.AccountId, cancellationToken: cancellationToken);
+        await _mediator.Send(new AddAccountNotificationCommand()
+        {
+            AccountId = companyAccountId,
+            Message = $"Sürücünüz {_userSession.Name} {_userSession.Surname}, {trip.AccountVehicle.Plate} plakalı araçla transfer başlatmıştır."
+        }, cancellationToken);
         return new Unit();
     }
 }

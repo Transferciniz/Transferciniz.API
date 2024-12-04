@@ -67,6 +67,7 @@ public class AccountVehicleProblemHistory
     public Guid Id { get; set; }
     public Guid AccountVehicleProblemId { get; set; }
     public Guid AccountId { get; set; }
+    public Account Account { get; set; }
     public AccountVehicleProblemStatus FromStatus { get; set; }
     public AccountVehicleProblemStatus ToStatus { get; set; }
     public DateTime CreatedAt { get; set; }

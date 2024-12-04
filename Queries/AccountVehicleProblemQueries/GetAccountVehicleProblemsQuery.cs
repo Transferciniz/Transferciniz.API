@@ -24,6 +24,26 @@ public class GetAccountVehicleProblemsQueryHandler: IRequestHandler<GetAccountVe
             .Where(x => x.AccountVehicleId == request.AccountVehicleId)
             .Include(x => x.Account)
             .Include(x => x.AccountVehicleProblemHistories)
+            .ThenInclude(x => x.Account)
+            .Select(x => new AccountVehicleProblem
+            {
+                Id = x.Id,
+                AccountVehicleId = x.AccountVehicleId,
+                AccountId = x.AccountId,
+                Status = x.Status,
+                AccountVehicleProblemHistories = x.AccountVehicleProblemHistories,
+                Message = x.Message,
+                CompletedAt = x.CompletedAt,
+                CreatedAt = x.CreatedAt,
+                Account = new Account
+                {
+                    Id = x.Account.Id,
+                    Name = x.Account.Name,
+                    Surname = x.Account.Surname,
+                    ProfilePicture = x.Account.ProfilePicture,
+                    AccountType = x.Account.AccountType
+                }
+            })
             .ToListAsync(cancellationToken: cancellationToken);
     }
 }

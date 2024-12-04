@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Transferciniz.API;
@@ -11,9 +12,11 @@ using Transferciniz.API;
 namespace Transferciniz.API.Migrations
 {
     [DbContext(typeof(TransportationContext))]
-    partial class TransportationContextModelSnapshot : ModelSnapshot
+    [Migration("20241203175104_problem_fix")]
+    partial class problem_fix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -263,8 +266,6 @@ namespace Transferciniz.API.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
 
                     b.HasIndex("AccountVehicleProblemId");
 
@@ -768,19 +769,11 @@ namespace Transferciniz.API.Migrations
 
             modelBuilder.Entity("Transferciniz.API.Entities.AccountVehicleProblemHistory", b =>
                 {
-                    b.HasOne("Transferciniz.API.Entities.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Transferciniz.API.Entities.AccountVehicleProblem", null)
                         .WithMany("AccountVehicleProblemHistories")
                         .HasForeignKey("AccountVehicleProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("Transferciniz.API.Entities.Session", b =>
