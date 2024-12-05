@@ -31,7 +31,7 @@ public class AddAccountNotificationCommandHandler: IRequestHandler<AddAccountNot
             IsViewed = false,
             Message = request.Message
         }, cancellationToken);
-        await _locationHub.SendMessageToGroup(request.AccountId.ToString(), "onNotificationRecieved", new
+        await _locationHub.SendMessageToGroup($"account@{request.AccountId}", "onNotificationRecieved", new
         {
             request.Message
         });
