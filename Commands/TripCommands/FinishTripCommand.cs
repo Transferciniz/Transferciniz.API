@@ -28,8 +28,14 @@ public class FinishTripCommandHandler: IRequestHandler<FinishTripCommand, Unit>
     {
         var trip = await _context.Trips
             .Include(trip => trip.AccountVehicle)
+            .Include(x => x.WayPoints)
             .FirstAsync(x => x.Id == request.TripId, cancellationToken: cancellationToken);
         trip.Status = TripStatus.Finished;
+        foreach (var tripWayPoint in trip.WayPoints)
+        {
+            tripWayPoint.Status = WaypointStatus.Finished;
+            _context.WayPoints.Update(tripWayPoint);
+        }
         _context.Trips.Update(trip);
         await _context.SaveChangesAsync(cancellationToken);
 

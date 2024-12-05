@@ -42,37 +42,8 @@ public class GetTripDetailsForCustomerQueryHandler: IRequestHandler<GetTripDetai
             .FirstAsync(cancellationToken: cancellationToken);
         var driver = await _context.Accounts.FirstOrDefaultAsync(x => x.Id == trip.AccountVehicle.DriverId, cancellationToken: cancellationToken);
         var response =  driver is null ? trip.ToDto(): trip.ToDto(driver);
-        var userWaypoint = response.Waypoints.Find(x => x.Users.Any(y => y.AccountId == _session.Id));
-        var isUserCame = userWaypoint?.Users?.Find(x => x.AccountId == _session.Id)?.IsCame ?? false;
-        
-        var currentVehiclePosition = await _context.AccountVehicles.Where(x => x.Id == response.AccountVehicleId)
-            .Select(x => new
-            {
-                x.Latitude,
-                x.Longitude
-            }).AsNoTracking().FirstAsync(cancellationToken: cancellationToken);
-        var currentVehiclePositionPoint = new Point(currentVehiclePosition.Latitude, currentVehiclePosition.Longitude);
-        var waypointPoint = new Point(userWaypoint.Latitude, userWaypoint.Longitude);
-        var userAndVehicleDistance = currentVehiclePositionPoint.Distance(waypointPoint);
 
-        if (response.Status == TripStatus.Finished)
-        {
-            response.UserStatus = isUserCame ? TripProgressStatusForUser.Finished : TripProgressStatusForUser.Escaped;
-        }
-        else
-        {
-            if (isUserCame)
-            {
-                response.UserStatus = TripProgressStatusForUser.OnVehicle;
-            }
-            else
-            {
-                response.UserStatus = userAndVehicleDistance < 100
-                    ? TripProgressStatusForUser.OnWaypoint
-                    : TripProgressStatusForUser.OnRoad;
-            }
-        }
-
+        response.WaypointStatus = trip.WayPoints.First(x => x.WayPointUsers.Any(x => x.AccountId == _session.Id)).Status;
         return response;
 
     }

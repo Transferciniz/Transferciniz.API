@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Transferciniz.API.DTOs;
+using Transferciniz.API.Entities;
 
 namespace Transferciniz.API.Commands.WaypointCommands;
 
@@ -26,6 +27,7 @@ public class UpdateWaypointCommandHandler: IRequestHandler<UpdateWaypointCommand
             .FirstAsync(cancellationToken: cancellationToken);
 
         waypoint.IsCompleted = true;
+        waypoint.Status = WaypointStatus.InProgress;
         _context.WayPoints.Update(waypoint);
         foreach (var user in request.Waypoint.Users)
         {
