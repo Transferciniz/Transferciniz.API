@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Transferciniz.API.Commands.AccountNotificationCommands;
 using Transferciniz.API.Entities;
+using Transferciniz.API.Hubs;
 using Transferciniz.API.Services;
 
 namespace Transferciniz.API.Commands.TripCommands;
@@ -16,12 +17,14 @@ public class FinishTripCommandHandler: IRequestHandler<FinishTripCommand, Unit>
     private readonly TransportationContext _context;
     private readonly IMediator _mediator;
     private readonly IUserSession _userSession;
+    private readonly LocationHub _locationHub;
 
-    public FinishTripCommandHandler(TransportationContext context, IMediator mediator, IUserSession userSession)
+    public FinishTripCommandHandler(TransportationContext context, IMediator mediator, IUserSession userSession, LocationHub locationHub)
     {
         _context = context;
         _mediator = mediator;
         _userSession = userSession;
+        _locationHub = locationHub;
     }
 
     public async Task<Unit> Handle(FinishTripCommand request, CancellationToken cancellationToken)
@@ -55,6 +58,8 @@ public class FinishTripCommandHandler: IRequestHandler<FinishTripCommand, Unit>
         tripHeader.Status = TripStatus.Finished;
         _context.TripHeaders.Update(tripHeader);
         await _context.SaveChangesAsync(cancellationToken);
+
+        await _locationHub.SendMessageToGroup($"vehicle@{trip.AccountVehicleId}", "onTripFinished", new { });
   
         return Unit.Value;
 
