@@ -1,5 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Geometries;
+using Transferciniz.API.Commands.AccountNotificationCommands;
 using Transferciniz.API.Entities;
 using Transferciniz.API.Hubs;
 
@@ -16,11 +18,15 @@ public class OnDriverLocationChanged: INotificationHandler<UserLocationChangedNo
 {
     private readonly TransportationContext _context;
     private readonly LocationHub _locationHub;
+    private readonly ILogger<OnDriverLocationChanged> _logger;
+    private readonly IMediator _mediator;
 
-    public OnDriverLocationChanged(TransportationContext context, LocationHub locationHub)
+    public OnDriverLocationChanged(TransportationContext context, LocationHub locationHub, ILogger<OnDriverLocationChanged> logger, IMediator mediator)
     {
         _context = context;
         _locationHub = locationHub;
+        _logger = logger;
+        _mediator = mediator;
     }
 
     public async Task Handle(UserLocationChangedNotification notification, CancellationToken cancellationToken)
@@ -43,6 +49,79 @@ public class OnDriverLocationChanged: INotificationHandler<UserLocationChangedNo
                 {
                     notification.Latitude, notification.Longitude
                 });
+
+                var waypointStatusList = new List<WaypointStatus>([
+                    WaypointStatus.OnRoad, WaypointStatus.Near500Mt, WaypointStatus.Near200Mt, WaypointStatus.Near1Km,
+                ]);
+                var waypoints = await _context.Trips
+                    .Where(x => x.AccountVehicleId == accountVehicle.Id && x.Status == TripStatus.Live)
+                    .Include(x => x.WayPoints.Where(x => waypointStatusList.Contains(x.Status)))
+                    .ThenInclude(x => x.WayPointUsers)
+                    .SelectMany(x => x.WayPoints)
+                    .ToListAsync(cancellationToken: cancellationToken);
+                
+                foreach (var waypoint in waypoints)
+                {
+                    var currentWaypointStatus = waypoint.Status;
+                    var newWaypointStatus = waypoint.Status;
+                    var vehiclePoint = new Point(notification.Latitude, notification.Longitude);
+                    var waypointPoint = new Point(waypoint.Latitude, waypoint.Longitude);
+                    var distance = vehiclePoint.Distance(waypointPoint);
+
+                    if (distance <= 1000) newWaypointStatus = WaypointStatus.Near1Km;
+                    if (distance <= 500) newWaypointStatus = WaypointStatus.Near500Mt;
+                    if (distance <= 200) newWaypointStatus = WaypointStatus.Near200Mt;
+                    if (distance <= 50) newWaypointStatus = WaypointStatus.OnWaypoint;
+
+                    if (currentWaypointStatus != newWaypointStatus)
+                    {
+                        var notificationMessage = "";
+                        switch (newWaypointStatus)
+                        {
+                            case WaypointStatus.Waiting:
+                                break;
+                            case WaypointStatus.OnRoad:
+                                break;
+                            case WaypointStatus.Near1Km:
+                                notificationMessage = "Aracınız size tahmini 1KM uzaklıktadır, hazır durumda beklemeniz için ilk çağrı.";
+                                break;
+                            case WaypointStatus.Near500Mt:
+                                notificationMessage = "Aracınız mahallenize girmiştir, hazır durumda beklemeniz için ikinci çağrı.";
+                                break;
+                            case WaypointStatus.Near200Mt:
+                                notificationMessage = "Aracınız durağınıza varmak üzeredir, hazır durumda beklemeniz için son çağrı.";
+                                break;
+                            case WaypointStatus.OnWaypoint:
+                                notificationMessage = "Aracınız gelmiştir, lütfen aracınıza bininiz.";
+                                break;
+                            case WaypointStatus.InProgress:
+                                break;
+                            case WaypointStatus.Finished:
+                                break;
+                            default:
+                                _logger.LogCritical($"Yeni Durak Statüsü hiçbirine uymadı: {newWaypointStatus.ToString()}");
+                                break;
+                        }
+
+                        waypoint.Status = newWaypointStatus;
+                        _context.WayPoints.Update(waypoint);
+                        await _context.SaveChangesAsync(cancellationToken);
+                        foreach (var account in waypoint.WayPointUsers.Where(x => x.AccountId.HasValue).ToList())
+                        {
+                           await _mediator.Send(new AddAccountNotificationCommand
+                            {
+                                AccountId = (Guid)account.AccountId!,
+                                Message = notificationMessage
+                            }, cancellationToken);
+                        }
+
+                        await _locationHub.SendMessageToGroup($"vehicle@{accountVehicle.Id}",
+                            "onAccountWaypointStatusChanged", new
+                            {
+                                Status = newWaypointStatus
+                            });
+                    }
+                }
             }
         }
     }

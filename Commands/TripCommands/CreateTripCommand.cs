@@ -121,6 +121,7 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, Creat
                         Latitude = waypoint.Latitude,
                         Ordering = waypoint.Ordering,
                         IsCompleted = false,
+                        Status = WaypointStatus.Waiting,
                         WayPointUsers = new List<WayPointUser>()
                     }, cancellationToken);
                     foreach (var waypointUser in waypoint.Users)

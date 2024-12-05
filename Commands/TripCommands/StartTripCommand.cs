@@ -37,6 +37,10 @@ public class StartTripCommandHandler: IRequestHandler<StartTripCommand, Unit>
         if (trip.Status == TripStatus.Live) return new Unit();
         trip.Status = TripStatus.Live;
         trip.DriverId = _userSession.Id;
+        foreach (var tripWayPoint in trip.WayPoints)
+        {
+            tripWayPoint.Status = WaypointStatus.OnRoad;
+        }
         _context.Trips.Update(trip);
     
         

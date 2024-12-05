@@ -72,6 +72,7 @@ public class WayPoint
     public string Name { get; set; }
     public int Ordering { get; set; }
     public bool IsCompleted { get; set; }
+    public WaypointStatus Status { get; set; }
     public ICollection<WayPointUser> WayPointUsers { get; set; }
 
     public WayPointDto ToDto()
@@ -116,4 +117,16 @@ public class WayPointUser
         };
     }
     
+}
+
+public enum WaypointStatus
+{
+    Waiting = 0,
+    OnRoad = 1,
+    Near1Km = 2,
+    Near500Mt = 3,
+    Near200Mt = 4,
+    OnWaypoint = 5,
+    InProgress = 6,
+    Finished = 7
 }
