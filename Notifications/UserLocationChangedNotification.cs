@@ -64,6 +64,11 @@ public class OnDriverLocationChanged: INotificationHandler<UserLocationChangedNo
                     .Where(x => x.AccountVehicleId == accountVehicle.Id && x.Status == TripStatus.Live)
                     .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
+                if (trip is null)
+                {
+                    Console.WriteLine("@@@@@@@@@@@@@@@@@@@ TRIP BOŞ @@@@@@@@@@@@@@");
+                }
+    
                 var waypoints = trip.WayPoints.Where(x => waypointStatusList.Contains(x.Status) && x.IsCompleted == false).ToList();
     
 
