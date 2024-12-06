@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Transferciniz.API;
@@ -11,9 +12,11 @@ using Transferciniz.API;
 namespace Transferciniz.API.Migrations
 {
     [DbContext(typeof(TransportationContext))]
-    partial class TransportationContextModelSnapshot : ModelSnapshot
+    [Migration("20241206140736_status_changed")]
+    partial class status_changed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

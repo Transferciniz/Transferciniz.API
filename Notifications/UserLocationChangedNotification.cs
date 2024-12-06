@@ -60,6 +60,7 @@ public class OnDriverLocationChanged: INotificationHandler<UserLocationChangedNo
                     .SelectMany(x => x.WayPoints)
                     .ToListAsync(cancellationToken: cancellationToken);
                 
+                _logger.LogCritical($"Bulunan Waypoint Sayısı {waypoints.Count}");
                 foreach (var waypoint in waypoints)
                 {
                     var currentWaypointStatus = waypoint.Status;
@@ -67,6 +68,7 @@ public class OnDriverLocationChanged: INotificationHandler<UserLocationChangedNo
                     var vehiclePoint = new Point(notification.Latitude, notification.Longitude);
                     var waypointPoint = new Point(waypoint.Latitude, waypoint.Longitude);
                     var distance = vehiclePoint.Distance(waypointPoint);
+                    _logger.LogCritical($"Aracın {waypoint.Name} uzaklığı {distance} metredir");
 
                     if (distance <= 1000) newWaypointStatus = WaypointStatus.Near1Km;
                     if (distance <= 500) newWaypointStatus = WaypointStatus.Near500Mt;
