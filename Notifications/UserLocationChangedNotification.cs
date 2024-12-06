@@ -133,7 +133,7 @@ public class OnDriverLocationChanged: INotificationHandler<UserLocationChangedNo
                         await _locationHub.SendMessageToGroup($"vehicle@{accountVehicle.Id}",
                             "onAccountWaypointStatusChanged", new
                             {
-                                Status = newWaypointStatus
+                                status = (int)newWaypointStatus
                             });
                     }
                 }
