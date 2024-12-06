@@ -53,7 +53,11 @@ public class OnDriverLocationChanged: INotificationHandler<UserLocationChangedNo
                 var waypointStatusList = new List<WaypointStatus>([
                     WaypointStatus.OnRoad, WaypointStatus.Near500Mt, WaypointStatus.Near200Mt, WaypointStatus.Near1Km,
                 ]);
-
+                
+                Console.WriteLine("@@@@@@@ DEBUG @@@@@");
+                Console.WriteLine($"AccountVehicleId {accountVehicle.Id}");
+                Console.WriteLine($"NotificationAccountId {notification.Account.Id}");
+                Console.WriteLine($"AccountDriverId {accountVehicle.DriverId}");
                 var trip = await _context.Trips
                     .Include(x => x.WayPoints)
                     .ThenInclude(x => x.WayPointUsers)
