@@ -68,10 +68,8 @@ public class OnDriverLocationChanged: INotificationHandler<UserLocationChangedNo
                 {
                     var currentWaypointStatus = waypoint.Status;
                     var newWaypointStatus = waypoint.Status;
-                    var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 32633); // UTM Zone 33N
-                    var vehiclePoint = geometryFactory.CreatePoint(new Coordinate(notification.Longitude, notification.Latitude));
-                    var waypointPoint = geometryFactory.CreatePoint(new Coordinate(waypoint.Longitude, waypoint.Latitude));
-                    var distance = vehiclePoint.Distance(waypointPoint); 
+           
+                    var distance = CalculateDistanceAsMeter(waypoint, notification);
                     _logger.LogCritical($"Aracın {waypoint.Name} uzaklığı {distance} metredir");
 
                     if (distance <= 1000) newWaypointStatus = WaypointStatus.Near1Km;
@@ -130,6 +128,19 @@ public class OnDriverLocationChanged: INotificationHandler<UserLocationChangedNo
                 }
             }
         }
+    }
+
+    private double CalculateDistanceAsMeter(WayPoint waypoint, UserLocationChangedNotification notification)
+    {
+        double R = 6371000; // Dünya'nın yarıçapı (metre)
+        double dLat = (waypoint.Latitude - notification.Latitude) * Math.PI / 180;
+        double dLon = (waypoint.Longitude - notification.Longitude) * Math.PI / 180;
+        double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                   Math.Cos(notification.Latitude * Math.PI / 180) * Math.Cos(waypoint.Latitude * Math.PI / 180) *
+                   Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        double distance = R * c; // Mesafe metre olarak döner.
+        return distance;
     }
 }
 
