@@ -55,26 +55,15 @@ public class OnDriverLocationChanged: INotificationHandler<UserLocationChangedNo
                     WaypointStatus.OnRoad, WaypointStatus.Near500Mt, WaypointStatus.Near200Mt, WaypointStatus.Near1Km,
                 ]);
                 
-                Console.WriteLine("@@@@@@@ DEBUG @@@@@");
-                Console.WriteLine($"AccountVehicleId {accountVehicle.Id}");
-                Console.WriteLine($"NotificationAccountId {notification.Account.Id}");
-                Console.WriteLine($"AccountDriverId {accountVehicle.DriverId}");
                 var trip = await _context.Trips
                     .Include(x => x.WayPoints)
                     .ThenInclude(x => x.WayPointUsers)
                     .Where(x => x.AccountVehicleId == accountVehicle.Id && x.Status == TripStatus.Live)
                     .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-
-                if (trip is null)
-                {
-                    Console.WriteLine("@@@@@@@@@@@@@@@@@@@ TRIP BOŞ @@@@@@@@@@@@@@");
-                }
+                
     
                 var waypoints = trip.WayPoints.Where(x => waypointStatusList.Contains(x.Status) && x.IsCompleted == false).ToList();
-    
-
                 
-                _logger.LogCritical($"Bulunan Waypoint Sayısı {waypoints.Count}");
                 foreach (var waypoint in waypoints)
                 {
                     var currentWaypointStatus = waypoint.Status;
