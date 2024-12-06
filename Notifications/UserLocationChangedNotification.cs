@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite;
 using NetTopologySuite.Geometries;
 using Transferciniz.API.Commands.AccountNotificationCommands;
 using Transferciniz.API.Entities;
@@ -78,9 +79,10 @@ public class OnDriverLocationChanged: INotificationHandler<UserLocationChangedNo
                 {
                     var currentWaypointStatus = waypoint.Status;
                     var newWaypointStatus = waypoint.Status;
-                    var vehiclePoint = new Point(notification.Latitude, notification.Longitude);
-                    var waypointPoint = new Point(waypoint.Latitude, waypoint.Longitude);
-                    var distance = vehiclePoint.Distance(waypointPoint);
+                    var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 32633); // UTM Zone 33N
+                    var vehiclePoint = geometryFactory.CreatePoint(new Coordinate(notification.Longitude, notification.Latitude));
+                    var waypointPoint = geometryFactory.CreatePoint(new Coordinate(waypoint.Longitude, waypoint.Latitude));
+                    var distance = vehiclePoint.Distance(waypointPoint); 
                     _logger.LogCritical($"Aracın {waypoint.Name} uzaklığı {distance} metredir");
 
                     if (distance <= 1000) newWaypointStatus = WaypointStatus.Near1Km;
