@@ -55,10 +55,11 @@ public class OnDriverLocationChanged: INotificationHandler<UserLocationChangedNo
                 ]);
                 var waypoints = await _context.Trips
                     .Where(x => x.AccountVehicleId == accountVehicle.Id && x.Status == TripStatus.Live)
-                    .Include(x => x.WayPoints.Where(x => waypointStatusList.Contains(x.Status)))
+                    .Include(x => x.WayPoints)
                     .ThenInclude(x => x.WayPointUsers)
                     .SelectMany(x => x.WayPoints)
                     .ToListAsync(cancellationToken: cancellationToken);
+                waypoints = waypoints.Where(x => x.IsCompleted == false).ToList();
                 
                 _logger.LogCritical($"Bulunan Waypoint Sayısı {waypoints.Count}");
                 foreach (var waypoint in waypoints)
