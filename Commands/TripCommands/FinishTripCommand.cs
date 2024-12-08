@@ -59,7 +59,8 @@ public class FinishTripCommandHandler: IRequestHandler<FinishTripCommand, Unit>
         _context.TripHeaders.Update(tripHeader);
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _locationHub.SendMessageToGroup($"vehicle@{trip.AccountVehicleId}", "onTripFinished", new { });
+        await _locationHub.SendToTrip(trip.Id, LocationHub.SocketMethods.OnTripFinished, new {});
+     
   
         return Unit.Value;
 

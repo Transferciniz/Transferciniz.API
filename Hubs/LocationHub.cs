@@ -11,6 +11,18 @@ public class LocationHub: Hub
     private readonly IMediator _mediator;
     private static readonly Dictionary<string, int> _groupCounts = new();
 
+    
+    public enum SocketMethods
+    {
+        OnLocationChanged = 0,
+        OnVehicleLocationChanged = 1,
+        OnWaypointStatusChanged = 2,
+        OnNotificationRecieved = 3,
+        OnTripFinished = 4,
+        OnTripStatusChanged = 5
+    }
+ 
+    
     public LocationHub(IMediator mediator)
     {
         _mediator = mediator;
@@ -42,13 +54,13 @@ public class LocationHub: Hub
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
     }
 
-    public async Task SendMessageToGroup(string groupName, string methodName, object data)
+    private async Task SendMessageToGroup(string groupName, object data)
     {
         try
         {
             if (_groupCounts.ContainsKey(groupName))
             {
-                await Clients.Groups(groupName).SendCoreAsync(methodName, [data]);
+                await Clients.Groups(groupName).SendCoreAsync("change", [data]);
             }
         }
         catch (Exception e)
@@ -56,6 +68,24 @@ public class LocationHub: Hub
             Console.WriteLine(e);
         }
 
+    }
+
+    public async Task SendToAccount(Guid accountId, SocketMethods methodName, object data)
+    {
+        await SendMessageToGroup($"account@{accountId}", new
+        {
+            Method = methodName,
+            Data = data ?? new {}
+        });
+    }
+
+    public async Task SendToTrip(Guid tripId, SocketMethods methodName, object data)
+    {
+        await SendMessageToGroup($"trip@{tripId}", new
+        {
+            Method = methodName,
+            Data = data 
+        });
     }
 
     [SignalRMethod]

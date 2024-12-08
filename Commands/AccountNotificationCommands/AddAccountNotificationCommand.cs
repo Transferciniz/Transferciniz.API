@@ -31,10 +31,10 @@ public class AddAccountNotificationCommandHandler: IRequestHandler<AddAccountNot
             IsViewed = false,
             Message = request.Message
         }, cancellationToken);
-        await _locationHub.SendMessageToGroup($"account@{request.AccountId}", "onNotificationRecieved", new
-        {
-            request.Message
-        });
+
+        await _locationHub.SendToAccount(request.AccountId, LocationHub.SocketMethods.OnNotificationRecieved,
+            new { request.Message });
+
         await _context.SaveChangesAsync(cancellationToken);
         return Unit.Value;
     }

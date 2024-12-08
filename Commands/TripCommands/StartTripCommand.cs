@@ -67,7 +67,8 @@ public class StartTripCommandHandler: IRequestHandler<StartTripCommand, Unit>
                 AccountId = (Guid)accountId,
                 Message = $"Aracınız, {_userSession.Name} {_userSession.Surname} şoförlüğünde {trip.AccountVehicle.Plate} plakalı araçla yola çıkmıştır."
             }, cancellationToken);
-            await _locationHub.SendMessageToGroup($"account@{accountId}", "onTripStatusChange", new { });
+
+            await _locationHub.SendToAccount((Guid)accountId, LocationHub.SocketMethods.OnTripStatusChanged, new { });
         }
 
         var companyAccountId = await _context.Accounts.Select(x => x.Id).FirstAsync(x => x == trip.AccountVehicle.AccountId, cancellationToken: cancellationToken);
