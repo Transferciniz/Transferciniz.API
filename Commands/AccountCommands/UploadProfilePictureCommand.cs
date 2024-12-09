@@ -24,17 +24,20 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
     private readonly IS3Service _s3Service;
     private readonly TransportationContext _context;
     private readonly IConfiguration _configuration;
+    private readonly ILogger<UploadProfilePictureCommandHandler> _logger;
 
-    public UploadProfilePictureCommandHandler(IUserSession session, IS3Service s3Service, TransportationContext context, IConfiguration configuration)
+    public UploadProfilePictureCommandHandler(IUserSession session, IS3Service s3Service, TransportationContext context, IConfiguration configuration, ILogger<UploadProfilePictureCommandHandler> logger)
     {
         _session = session;
         _s3Service = s3Service;
         _context = context;
         _configuration = configuration;
+        _logger = logger;
     }
 
     public async Task<UploadProfilePictureCommandResponse> Handle(UploadProfilePictureCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogCritical("Profil Yükleme Başladı");
         var url = await _s3Service.UploadFileToSpacesAsync(request.File);
         var user = await _context.Accounts.Where(x => x.Id == _session.Id).FirstAsync(cancellationToken: cancellationToken);
         var session = await _context.Sessions.FirstAsync(x => x.AccountId == _session.Id, cancellationToken: cancellationToken);
@@ -42,6 +45,7 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
         
         _context.Accounts.Update(user);
         await _context.SaveChangesAsync(cancellationToken);
+        _logger.LogCritical("Profil Yükleme Başarılı!!!");
         return new UploadProfilePictureCommandResponse
         {
             Token = user.GenerateToken(_configuration, session.Id)
