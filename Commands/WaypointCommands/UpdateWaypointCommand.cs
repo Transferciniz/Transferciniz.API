@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Transferciniz.API.DTOs;
 using Transferciniz.API.Entities;
+using Transferciniz.API.Hubs;
 
 namespace Transferciniz.API.Commands.WaypointCommands;
 
@@ -13,10 +14,12 @@ public class UpdateWaypointCommand: IRequest<Unit>
 public class UpdateWaypointCommandHandler: IRequestHandler<UpdateWaypointCommand, Unit>
 {
     private readonly TransportationContext _context;
+    private readonly LocationHub _locationHub;
 
-    public UpdateWaypointCommandHandler(TransportationContext context)
+    public UpdateWaypointCommandHandler(TransportationContext context, LocationHub locationHub)
     {
         _context = context;
+        _locationHub = locationHub;
     }
 
     public async Task<Unit> Handle(UpdateWaypointCommand request, CancellationToken cancellationToken)
@@ -37,6 +40,10 @@ public class UpdateWaypointCommandHandler: IRequestHandler<UpdateWaypointCommand
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+        await _locationHub.SendToTrip(waypoint.TripId, LocationHub.SocketMethods.OnWaypointStatusChanged, new
+        {
+            status = (int)WaypointStatus.InProgress
+        });
         return Unit.Value;
     }
 }
