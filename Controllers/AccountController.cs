@@ -60,5 +60,8 @@ public class AccountController: ControllerBase
     [HttpPost]
     public async Task<Unit> UpdateDefaultLocation(UpdateDefaultLocationCommand request) => await _mediator.Send(request);
 
+    [HttpPost]
+    public async Task<CompleteAccountCommandResponse> CompleteAccount(CompleteAccountCommand request) => await _mediator.Send(request);
+
 
 }

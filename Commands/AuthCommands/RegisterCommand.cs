@@ -49,6 +49,7 @@ public class RegisterUserCommandHandler: IRequestHandler<RegisterCommand, Regist
             TaxRate = 20,
             ProfilePicture = "",
             TaxNumber = request.TaxNumber,
+            IsAccountCompleted = false,
             InvoiceAddress = request.InvoiceAddress,
         }, cancellationToken);
         

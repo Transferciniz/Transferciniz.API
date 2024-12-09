@@ -21,6 +21,7 @@ public static class JwtHelper
             new Claim("profilePicture", account.ProfilePicture),
             new Claim("accountType", account.AccountType.ToString()),
             new Claim("username", account.Username),
+            new Claim("isAccountCompleted", account.IsAccountCompleted.ToString()),
             new Claim("latitude", account.Latitude.ToString(CultureInfo.InvariantCulture)),
             new Claim("longitude",account.Longitude.ToString(CultureInfo.InvariantCulture))
         };

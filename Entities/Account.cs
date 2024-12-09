@@ -22,6 +22,7 @@ public class Account
     public string TaxNumber { get; set; }
     public decimal TaxRate { get; set; } = 20;
     public decimal CommissionRate { get; set; } = 10;
+    public bool IsAccountCompleted { get; set; }
     public string InvoiceAddress { get; set; }
     
     public ICollection<AccountLocation> AccountLocations { get; set; }
