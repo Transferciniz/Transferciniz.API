@@ -37,69 +37,27 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
 
     public async Task<UploadProfilePictureCommandResponse> Handle(UploadProfilePictureCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogCritical("Profil Yükleme Başladı");
-        var url = await _s3Service.UploadFileToSpacesAsync(request.File);
+       
+        var url = await _s3Service.UploadFileToSpacesAsync(await ProcessImage(request.File));
         var user = await _context.Accounts.Where(x => x.Id == _session.Id).FirstAsync(cancellationToken: cancellationToken);
         var session = await _context.Sessions.FirstAsync(x => x.AccountId == _session.Id, cancellationToken: cancellationToken);
         user.ProfilePicture = url;
         
         _context.Accounts.Update(user);
         await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogCritical("Profil Yükleme Başarılı!!!");
+ 
         return new UploadProfilePictureCommandResponse
         {
             Token = user.GenerateToken(_configuration, session.Id)
         };
-        
-        /*
-        var url = await _s3Service.UploadFileToSpacesAsync(await ConvertImage(request.File, $"{Guid.NewGuid()}.jpg"));
-        var user = await _context.Accounts.Where(x => x.Id == _session.Id).FirstAsync(cancellationToken: cancellationToken);
-        var session = await _context.Sessions.FirstAsync(x => x.AccountId == _session.Id, cancellationToken: cancellationToken);
-        user.ProfilePicture = url;
-        
-        _context.Accounts.Update(user);
-        await _context.SaveChangesAsync(cancellationToken);
-        return new UploadProfilePictureCommandResponse
-        {
-            Token = user.GenerateToken(_configuration, session.Id)
-        };
-        */
-    }
-    
-    public static async Task<IFormFile> ConvertImage(string base64String, string fileName)
-    {
-        var imageBytes = await ConvertBase64AndProcessImageAsync(base64String);
-
-        // MemoryStream oluştur ve byte dizisini buraya yaz
-        var stream = new MemoryStream(imageBytes);
-
-        // IFormFile oluştur
-        var formFile = new FormFile(stream, 0, stream.Length, "file", fileName)
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "image/jpeg" // veya ilgili içerik tipi (örn. "image/png")
-        };
-
-        return formFile;
     }
 
-    private static async Task<byte[]> ConvertBase64AndProcessImageAsync(string base64String, int maxWidth = 1080, int maxHeight = 1920, int quality = 60)
+    private static async Task<IFormFile> ProcessImage(IFormFile file, int maxWidth = 500, int maxHeight = 500, int quality = 60)
     {
-        // Base64 header'ını kaldır (örneğin: data:image/jpeg;base64,)
-        if (base64String.StartsWith("data:image/jpeg;base64,"))
-        {
-            base64String = base64String.Substring("data:image/jpeg;base64,".Length);
-        }
-        else if (base64String.StartsWith("data:image/png;base64,"))
-        {
-            base64String = base64String.Substring("data:image/png;base64,".Length);
-        }
-
-        // Base64 string'i byte dizisine çevir
-        byte[] imageBytes = Convert.FromBase64String(base64String);
-
         // MemoryStream oluştur ve byte dizisini buraya yaz
-        using var stream = new MemoryStream(imageBytes);
+        using var stream = new MemoryStream();
+        await file.CopyToAsync(stream);
+        
         // ImageSharp ile resmi açın
         using var image = await Image.LoadAsync(stream);
 
@@ -138,7 +96,13 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
         // Sıkıştırılmış resmi belleğe yaz
         using var outputStream = new MemoryStream();
         await image.SaveAsync(outputStream, encoder);
-        return outputStream.ToArray(); // Sıkıştırılmış resmi byte dizisi olarak döndür
+        return new FormFile(outputStream, 0, outputStream.Length, "file", file.Name)
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = file.ContentType
+        };
 
     }
+    
+  
 }
