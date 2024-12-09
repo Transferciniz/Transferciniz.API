@@ -40,7 +40,7 @@ public class AccountController: ControllerBase
     public async Task<List<AccountLocation>> GetMyLocations([FromQuery] GetMyLocationsQuery request) => await _mediator.Send(request);
 
     [HttpPost]
-    public async Task<UploadProfilePictureCommandResponse> ChangeProfilePicture(UploadProfilePictureCommand request) => await _mediator.Send(request);
+    public async Task<UploadProfilePictureCommandResponse> ChangeProfilePicture([FromForm]UploadProfilePictureCommand request) => await _mediator.Send(request);
 
     [HttpPost]
     public async Task<Unit> UpdateLocation(UpdateLocationCommand request) => await _mediator.Send(request);

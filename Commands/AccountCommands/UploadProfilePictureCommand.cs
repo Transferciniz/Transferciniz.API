@@ -10,7 +10,7 @@ namespace Transferciniz.API.Commands.AccountCommands;
 
 public class UploadProfilePictureCommand: IRequest<UploadProfilePictureCommandResponse>
 {
-    public string File { get; set; }
+    public IFormFile File { get; set; }
 }
 
 public class UploadProfilePictureCommandResponse
@@ -35,6 +35,19 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
 
     public async Task<UploadProfilePictureCommandResponse> Handle(UploadProfilePictureCommand request, CancellationToken cancellationToken)
     {
+        var url = await _s3Service.UploadFileToSpacesAsync(request.File);
+        var user = await _context.Accounts.Where(x => x.Id == _session.Id).FirstAsync(cancellationToken: cancellationToken);
+        var session = await _context.Sessions.FirstAsync(x => x.AccountId == _session.Id, cancellationToken: cancellationToken);
+        user.ProfilePicture = url;
+        
+        _context.Accounts.Update(user);
+        await _context.SaveChangesAsync(cancellationToken);
+        return new UploadProfilePictureCommandResponse
+        {
+            Token = user.GenerateToken(_configuration, session.Id)
+        };
+        
+        /*
         var url = await _s3Service.UploadFileToSpacesAsync(await ConvertImage(request.File, $"{Guid.NewGuid()}.jpg"));
         var user = await _context.Accounts.Where(x => x.Id == _session.Id).FirstAsync(cancellationToken: cancellationToken);
         var session = await _context.Sessions.FirstAsync(x => x.AccountId == _session.Id, cancellationToken: cancellationToken);
@@ -46,6 +59,7 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
         {
             Token = user.GenerateToken(_configuration, session.Id)
         };
+        */
     }
     
     public static async Task<IFormFile> ConvertImage(string base64String, string fileName)
