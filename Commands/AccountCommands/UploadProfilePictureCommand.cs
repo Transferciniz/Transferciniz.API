@@ -57,6 +57,7 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
         // MemoryStream oluştur ve byte dizisini buraya yaz
         using var stream = new MemoryStream();
         await file.CopyToAsync(stream);
+        stream.Position = 0;
         
         // ImageSharp ile resmi açın
         using var image = await Image.LoadAsync(stream);
@@ -96,6 +97,7 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
         // Sıkıştırılmış resmi belleğe yaz
         using var outputStream = new MemoryStream();
         await image.SaveAsync(outputStream, encoder);
+        outputStream.Position = 0;
         return new FormFile(outputStream, 0, outputStream.Length, "file", file.Name)
         {
             Headers = new HeaderDictionary(),
