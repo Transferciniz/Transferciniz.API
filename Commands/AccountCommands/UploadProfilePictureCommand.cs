@@ -54,53 +54,54 @@ public class UploadProfilePictureCommandHandler : IRequestHandler<UploadProfileP
 
     private static async Task<IFormFile> ProcessImage(IFormFile file, int maxWidth = 500, int maxHeight = 500, int quality = 60)
     {
-        // MemoryStream oluştur ve byte dizisini buraya yaz
-        using var stream = new MemoryStream();
-        await file.CopyToAsync(stream);
-        stream.Position = 0;
-        
-        // ImageSharp ile resmi açın
-        using var image = await Image.LoadAsync(stream);
+        quality = Math.Clamp(quality, 1, 100);
 
-        // Orantılı yeniden boyutlandırma için yeni genişlik ve yükseklik hesaplama
-        int originalWidth = image.Width;
-        int originalHeight = image.Height;
-
-        double aspectRatio = (double)originalWidth / originalHeight;
-
-        int newWidth = originalWidth;
-        int newHeight = originalHeight;
-
-        if (originalWidth > maxWidth || originalHeight > maxHeight)
+        var outputStream = new MemoryStream(); // OutputStream'i dışarıda oluştur
+        try
         {
-            if (aspectRatio > 1) // Yatay resim
+            using var inputStream = new MemoryStream();
+            await file.CopyToAsync(inputStream);
+            inputStream.Position = 0;
+
+            using var image = await Image.LoadAsync(inputStream);
+
+            int originalWidth = image.Width;
+            int originalHeight = image.Height;
+
+            double aspectRatio = (double)originalWidth / originalHeight;
+            int newWidth = originalWidth, newHeight = originalHeight;
+
+            if (originalWidth > maxWidth || originalHeight > maxHeight)
             {
-                newWidth = maxWidth;
-                newHeight = (int)(maxWidth / aspectRatio);
+                if (aspectRatio > 1) // Yatay resim
+                {
+                    newWidth = maxWidth;
+                    newHeight = (int)(maxWidth / aspectRatio);
+                }
+                else // Dikey resim veya kare
+                {
+                    newHeight = maxHeight;
+                    newWidth = (int)(maxHeight * aspectRatio);
+                }
             }
-            else // Dikey resim veya kare
-            {
-                newHeight = maxHeight;
-                newWidth = (int)(maxHeight * aspectRatio);
-            }
+
+            image.Mutate(x => x.Resize(newWidth, newHeight));
+
+            var encoder = new JpegEncoder { Quality = quality };
+            await image.SaveAsync(outputStream, encoder);
+
+            outputStream.Position = 0; // OutputStream'i başa sar
+        }
+        catch
+        {
+            await outputStream.DisposeAsync(); // Hata durumunda Stream'i kapat
+            throw;
         }
 
-        // Boyutlandırma (en-boy oranını koruyarak)
-        image.Mutate(x => x.Resize(newWidth, newHeight));
-
-        // Resmi sıkıştırma (JPEG formatında ve belirli kalite ile)
-        var encoder = new JpegEncoder()
+        // OutputStream'i FormFile'e sardır ve döndür
+        return new FormFile(outputStream, 0, outputStream.Length, file.Name, file.FileName)
         {
-            Quality = quality // JPEG kalitesi (1-100 arası)
-        };
-
-        // Sıkıştırılmış resmi belleğe yaz
-        using var outputStream = new MemoryStream();
-        await image.SaveAsync(outputStream, encoder);
-        outputStream.Position = 0;
-        return new FormFile(outputStream, 0, outputStream.Length, "file", file.Name)
-        {
-            Headers = new HeaderDictionary(),
+            Headers = file.Headers ?? new HeaderDictionary(),
             ContentType = file.ContentType
         };
 
