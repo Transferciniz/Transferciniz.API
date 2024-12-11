@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Transferciniz.API.Commands.AccountCommands;
 using Transferciniz.API.Commands.AccountLocationCommands;
+using Transferciniz.API.DTOs;
 using Transferciniz.API.Entities;
 using Transferciniz.API.Queries.AccountLocationQueries;
 using Transferciniz.API.Queries.AccountQueries;
@@ -62,6 +63,9 @@ public class AccountController: ControllerBase
 
     [HttpPost]
     public async Task<CompleteAccountCommandResponse> CompleteAccount(CompleteAccountCommand request) => await _mediator.Send(request);
+
+    [HttpGet]
+    public async Task<List<AccountDto>> GetEmployee([FromQuery]GetEmployeeQuery request) => await _mediator.Send(request);
 
 
 }

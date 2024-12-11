@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Transferciniz.API.DTOs;
 using Transferciniz.API.Entities;
 
 namespace Transferciniz.API.Helpers;
@@ -36,6 +37,22 @@ public static class JwtHelper
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+    
+    public static AccountDto ToDto(this Account account)
+    {
+        var defaultAddress = account.AccountLocations.First(x => x.IsDefault);
+        return new AccountDto
+        {
+            Id = account.Id,
+            AccountType = account.AccountType,
+            ProfilePicture = account.ProfilePicture,
+            Username = account.Username,
+            Name = account.Name,
+            Surname = account.Surname,
+            Latitude = defaultAddress.Latitude,
+            Longitude = defaultAddress.Longitude
+        };
     }
     
 }
