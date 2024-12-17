@@ -62,14 +62,10 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, Creat
         var tripHeader = await _context.TripHeaders.AddAsync(new TripHeader
         {
             Id = Guid.NewGuid(),
-            Fee = 0,
             Name = request.Name,
             AccountId = _userSession.Id,
-            StartDate = request.StartDate.ToUniversalTime(),
             Status = TripStatus.WaitingApprove,
-            TotalCost = 0,
-            TotalTripCost = 0,
-            TotalExtraServiceCost = 0,
+ 
         }, cancellationToken);
         
         
@@ -77,7 +73,7 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, Creat
         {
             Id = Guid.NewGuid(),
             ProviderTransactionId = "not-implemented",
-            Amount = tripHeader.Entity.TotalCost,
+            Amount = tripHeader.Entity.Cost,
             UserId = _userSession.Id,
             TripId = tripHeader.Entity.Id,
         }, cancellationToken);
@@ -99,15 +95,10 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, Creat
                 var tripEntity = await _context.Trips.AddAsync(new Trip
                 {
                     Id = Guid.NewGuid(),
-                    TotalCost = (plan.TotalLenghOfRoad / 1000) * vehicleEntity.BasePrice,
-                    TotalTripCost = (plan.TotalLenghOfRoad / 1000) * vehicleEntity.BasePrice,
                     StartDate = request.StartDate,
                     TripHeaderId = tripHeader.Entity.Id,
-                    Fee = 0,
                     AccountVehicleId = accountVehicle.Id,
-                    TotalExtraServiceCost = 0,
                     Status = TripStatus.Approved,
-                    TripExtraServices = new List<TripExtraService>(),
                     WayPoints = new List<WayPoint>()
                 }, cancellationToken);
                 foreach (var waypoint in plan.Waypoints)
@@ -119,7 +110,6 @@ public class CreateTripCommandHandler : IRequestHandler<CreateTripCommand, Creat
                         TripId = tripEntity.Entity.Id,
                         Longitude = waypoint.Longitude,
                         Latitude = waypoint.Latitude,
-                        Ordering = waypoint.Ordering,
                         IsCompleted = false,
                         Status = WaypointStatus.Waiting,
                         WayPointUsers = new List<WayPointUser>()

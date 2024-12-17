@@ -65,7 +65,7 @@ public class GetTripHistoryQueryHandler: IRequestHandler<GetTripHistoryQuery, Pa
         var tripHeaders = await _context.TripHeaders
             .Include(x => x.Trips)
             .Where(x => tripHeaderIds.Contains(x.Id) && x.Status == TripStatus.Finished)
-            .OrderByDescending(x => x.StartDate)
+            //.OrderByDescending(x => x.StartDate)
             .Skip(request.Skip)
             .Take(request.Take)
             .ToListAsync(cancellationToken: cancellationToken);
@@ -97,7 +97,7 @@ public class GetTripHistoryQueryHandler: IRequestHandler<GetTripHistoryQuery, Pa
         var data = await _context.TripHeaders
             .Include(x => x.Trips)
             .Where(x => tripHeaderIds.Contains(x.Id) && x.Status == TripStatus.Finished)
-            .OrderByDescending(x => x.StartDate)
+            //.OrderByDescending(x => x.StartDate)
             .Skip(request.Skip)
             .Take(request.Take)
             .ToListAsync(cancellationToken: cancellationToken);

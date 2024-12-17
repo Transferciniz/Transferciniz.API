@@ -29,6 +29,9 @@ public class TripController: ControllerBase
     [HttpPost]
     public async Task<CreateTripCommandResponse> CreateTrip(CreateTripCommand request) => await _mediator.Send(request);
 
+    [HttpPost]
+    public async Task<Unit> CreateTripV2(CreateTripCommandV2 request) => await _mediator.Send(request);
+
     [HttpGet]
     public async Task<List<TripHeader>> GetTripHeaders(GetIncomingTripsQuery request) => await _mediator.Send(request);
 

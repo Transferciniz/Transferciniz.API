@@ -23,7 +23,6 @@ public class GetTripDetailsQueryHandler: IRequestHandler<GetTripDetailsQuery, Li
     {
        return await _context.Trips
             .Where(x => x.TripHeaderId == request.TripHeaderId)
-            .Include(x => x.TripExtraServices)
             
             .Include(x => x.AccountVehicle)
             .ThenInclude(x => x.Vehicle)

@@ -16,16 +16,12 @@ public class Trip
     public AccountVehicle AccountVehicle { get; set; }
 
     public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public string Route { get; set; }
 
     public ICollection<WayPoint> WayPoints { get; set; }
     public TripStatus Status { get; set; }
-    
-    public ICollection<TripExtraService> TripExtraServices { get; set; }
-
-    public decimal TotalExtraServiceCost { get; set; }
-    public decimal TotalTripCost { get; set; }
-    public decimal TotalCost { get; set; }
-    public decimal Fee { get; set; }
+    public decimal Cost { get; set; }
 
     public TripDto ToDto()
     {
@@ -70,8 +66,8 @@ public class WayPoint
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public string Name { get; set; }
-    public int Ordering { get; set; }
     public bool IsCompleted { get; set; }
+    public DateTime EstimatedTimeOfArrival { get; set; }
     public WaypointStatus Status { get; set; }
     public ICollection<WayPointUser> WayPointUsers { get; set; }
 
@@ -83,7 +79,6 @@ public class WayPoint
             Longitude = Longitude,
             Latitude = Latitude,
             Name = Name,
-            Ordering = Ordering,
             Users = WayPointUsers.Select(x => x.ToDto()).ToList()
         };
     }

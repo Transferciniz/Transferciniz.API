@@ -24,7 +24,7 @@ public class GetIncomingTripsQueryHandler: IRequestHandler<GetIncomingTripsQuery
     public async Task<List<TripHeader>> Handle(GetIncomingTripsQuery request, CancellationToken cancellationToken)
     {
         return await _context.TripHeaders
-            .Where(x => x.StartDate > DateTime.UtcNow && x.StartDate < DateTime.UtcNow.AddDays(7))
+            .Where(x => x.Status == TripStatus.Approved)
             .Include(x => x.Trips)
             .ToListAsync(cancellationToken: cancellationToken);
     }
