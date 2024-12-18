@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Transferciniz.API.DTOs;
+using Transferciniz.API.Entities;
 using Transferciniz.API.Services;
 
 namespace Transferciniz.API.Queries.TripQueries;
@@ -23,6 +24,35 @@ public class GetTripHeadersForCustomerQueryHandler: IRequestHandler<GetTripHeade
 
     public async Task<List<TripHeaderDto>> Handle(GetTripHeadersForCustomerQuery request, CancellationToken cancellationToken)
     {
+        var tripHeaders = await _context.TripHeaders
+            .Where(th => th.Trips.Any(t =>
+                t.WayPoints.Any(wp =>
+                    wp.WayPointUsers.Any(wpu => wpu.AccountId == _userSession.Id))))
+            .Include(x => x.Trips)
+            .ThenInclude(t => t.AccountVehicle)
+            .ThenInclude(av => av.Vehicle)
+            .ThenInclude(v => v.VehicleModel)
+            .Include(x => x.Trips)
+            .ThenInclude(t => t.WayPoints)
+            .ThenInclude(wp => wp.WayPointUsers)
+            .ToListAsync(cancellationToken);
+
+        var drivers = new List<Account>();
+        drivers = tripHeaders.SelectMany(x => x.Trips).Where(x => x.DriverId.HasValue).Select(x => new Account
+            {
+                Id = x.DriverId ?? Guid.Empty
+            })
+            .Distinct().ToList();
+        if (drivers.Count > 0)
+        {
+            drivers = await _context.Accounts.Where(x => drivers.Select(d => d.Id).Contains(x.Id)).ToListAsync(cancellationToken: cancellationToken);
+        }
+
+        return tripHeaders
+            .Select(x => x.ToCustomerDto(_userSession.Id, drivers))
+            .OrderBy(x => x.StartDate)
+            .ToList();
+        /*
         var waypointIds = await _context.WayPointUsers
             .Where(x => x.AccountId == _userSession.Id)
             .Select(x => x.WayPointId)
@@ -56,5 +86,6 @@ public class GetTripHeadersForCustomerQueryHandler: IRequestHandler<GetTripHeade
             .ToListAsync(cancellationToken: cancellationToken);
 
         return tripHeaders.Select(x => x.ToCustomerDto(_userSession.Id)).OrderBy(x => x.StartDate).ToList();
+        */
     }
 }

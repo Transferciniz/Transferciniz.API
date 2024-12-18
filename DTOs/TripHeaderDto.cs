@@ -12,4 +12,10 @@ public class TripHeaderDto
     public string? VehiclePhoto { get; set; }
     public bool? WillCome { get; set; }
     public Guid? WaypointUserId { get; set; }
+    public string Route { get; set; }
+    public double WaypointLatitude { get; set; }
+    public double WaypointLongitude { get; set; }
+    public WaypointStatus WaypointStatus { get; set; }
+    public string? DriverName { get; set; }
+    public string? DriverPhoto { get; set; }
 }
