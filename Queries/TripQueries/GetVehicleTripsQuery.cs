@@ -33,6 +33,8 @@ public class GetVehicleTripsQueryHandler: IRequestHandler<GetVehicleTripsQuery, 
             .ThenInclude(x => x.Vehicle)
             .ThenInclude(x => x.VehicleBrand)
             
+            .Include(x => x.Bounds)
+            
             .Include(x => x.AccountVehicle)
             .ThenInclude(x => x.Vehicle)
             .ThenInclude(x => x.VehicleModel)

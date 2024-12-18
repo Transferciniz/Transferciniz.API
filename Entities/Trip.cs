@@ -1,6 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using NetTopologySuite.Geometries;
-using Skybrud.Essentials.Collections.Extensions;
 using Transferciniz.API.DTOs;
 
 namespace Transferciniz.API.Entities;
@@ -22,6 +20,8 @@ public class Trip
     public ICollection<WayPoint> WayPoints { get; set; }
     public TripStatus Status { get; set; }
     public decimal Cost { get; set; }
+    public TripDirection TripDirection { get; set; }
+    public TripBound Bounds { get; set; }
 
     public TripDto ToDto()
     {
@@ -31,9 +31,11 @@ public class Trip
             AccountVehicleId = AccountVehicle.Id,
             StartDate = StartDate,
             Status = Status,
+            Route = Route,
+            TripDirection = TripDirection,
             VehicleName = $"{AccountVehicle.Vehicle.VehicleBrand.Name} {AccountVehicle.Vehicle.VehicleModel.Name}",
             VehiclePlate = AccountVehicle.Plate,
-            Waypoints = WayPoints.Select(x => x.ToDto()).OrderBy(x => x.Ordering).ToList()
+            Waypoints = WayPoints.Select(x => x.ToDto()).ToList()
         };
     }
 
@@ -54,6 +56,24 @@ public class Trip
         };
     }
 
+}
+
+public enum TripDirection
+{
+    From = 1,
+    To = 2
+}
+
+
+public class TripBound
+{
+    [Key]
+    public Guid Id { get; set; }
+    public double StartLatitude { get; set; }
+    public double StartLongitude { get; set; }
+    
+    public double EndLatitude { get; set; }
+    public double EndLongitude { get; set; }
 }
 
 

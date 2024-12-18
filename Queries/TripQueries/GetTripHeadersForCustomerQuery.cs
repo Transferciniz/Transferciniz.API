@@ -25,16 +25,16 @@ public class GetTripHeadersForCustomerQueryHandler: IRequestHandler<GetTripHeade
     public async Task<List<TripHeaderDto>> Handle(GetTripHeadersForCustomerQuery request, CancellationToken cancellationToken)
     {
         var tripHeaders = await _context.TripHeaders
-            .Where(th => th.Trips.Any(t =>
-                t.WayPoints.Any(wp =>
-                    wp.WayPointUsers.Any(wpu => wpu.AccountId == _userSession.Id))))
-            .Include(x => x.Trips)
+            .Include(x => x.Trips.Where(x => x.Status != TripStatus.Finished))
             .ThenInclude(t => t.AccountVehicle)
             .ThenInclude(av => av.Vehicle)
             .ThenInclude(v => v.VehicleModel)
             .Include(x => x.Trips)
             .ThenInclude(t => t.WayPoints)
             .ThenInclude(wp => wp.WayPointUsers)
+            .Where(th => th.Trips.Any(t =>
+                t.Status != TripStatus.Finished && t.WayPoints.Any(wp =>
+                    wp.WayPointUsers.Any(wpu => wpu.AccountId == _userSession.Id))) && th.Status != TripStatus.Finished)
             .ToListAsync(cancellationToken);
 
         var drivers = new List<Account>();

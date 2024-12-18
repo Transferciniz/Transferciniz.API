@@ -30,6 +30,11 @@ public class CreateTripDto
     public Guid VehicleId { get; set; }
     public string Route { get; set; }
     public int Duration { get; set; }
+    public TripDirection TripDirection { get; set; }
+    public double StartLatitude { get; set; }
+    public double StartLongitude { get; set; }
+    public double EndLatitude { get; set; }
+    public double EndLongitude { get; set; }
     public List<CreateWaypointDto> Waypoints { get; set; }
 }
 
@@ -86,26 +91,44 @@ public class CreateTripCommandV2Handler : IRequestHandler<CreateTripCommandV2, U
                 .ToListAsync(cancellationToken: cancellationToken);
             foreach (var tripDto in request.Trips)
             {
-                var startDate = request.TimeType == TimeType.ArriveAtTime
-                    ? date
-                        .ToUniversalTime()
-                        .AddHours(request.Hour)
-                        .AddMinutes(request.Minute)
-                        .AddSeconds(tripDto.Duration * -1)
-                    : date
-                        .ToUniversalTime()
-                        .AddHours(request.Hour)
-                        .AddMinutes(request.Minute);
-                var endDate = request.TimeType == TimeType.ArriveAtTime
-                    ? date
-                        .ToUniversalTime()
-                        .AddHours(request.Hour)
-                        .AddMinutes(request.Minute)
-                    : date
-                        .ToUniversalTime()
-                        .AddHours(request.Hour)
-                        .AddMinutes(request.Minute)
-                        .AddSeconds(tripDto.Duration);
+                var startDate = DateTime.UtcNow;
+                var endDate = DateTime.UtcNow;
+                if (tripDto.TripDirection == TripDirection.From)
+                {
+                    startDate = request.TimeType == TimeType.ArriveAtTime
+                        ? date
+                            .ToUniversalTime()
+                            .AddHours(request.Hour)
+                            .AddMinutes(request.Minute)
+                            .AddSeconds(tripDto.Duration * -1)
+                        : date
+                            .ToUniversalTime()
+                            .AddHours(request.Hour)
+                            .AddMinutes(request.Minute);
+                    endDate = request.TimeType == TimeType.ArriveAtTime
+                        ? date
+                            .ToUniversalTime()
+                            .AddHours(request.Hour)
+                            .AddMinutes(request.Minute)
+                        : date
+                            .ToUniversalTime()
+                            .AddHours(request.Hour)
+                            .AddMinutes(request.Minute)
+                            .AddSeconds(tripDto.Duration);
+                }
+                else
+                {
+                    startDate =  date
+                            .ToUniversalTime()
+                            .AddHours(request.Hour)
+                            .AddMinutes(request.Minute);
+                    endDate =  date
+                            .ToUniversalTime()
+                            .AddHours(request.Hour)
+                            .AddMinutes(request.Minute)
+                            .AddSeconds(tripDto.Duration);
+                }
+          
                 var vehicle = accountVehicles.First(x => x.VehicleId == tripDto.VehicleId);
                 accountVehicles.Remove(vehicle);
                 var trip = await _context.Trips.AddAsync(new Trip
@@ -115,9 +138,18 @@ public class CreateTripCommandV2Handler : IRequestHandler<CreateTripCommandV2, U
                     Status = TripStatus.Approved,
                     StartDate = startDate,
                     EndDate = endDate,
+                    TripDirection = tripDto.TripDirection,
                     AccountVehicleId = vehicle.Id,
                     TripHeaderId = tripHeader.Entity.Id,
-                    Route = tripDto.Route
+                    Route = tripDto.Route,
+                    Bounds = new TripBound
+                    {
+                        Id = Guid.NewGuid(),
+                        StartLatitude = tripDto.StartLatitude,
+                        StartLongitude = tripDto.StartLongitude,
+                        EndLatitude = tripDto.EndLatitude,
+                        EndLongitude = tripDto.EndLongitude
+                    }
                 }, cancellationToken);
                 foreach (var waypointDto in tripDto.Waypoints)
                 {

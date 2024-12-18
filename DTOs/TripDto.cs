@@ -15,6 +15,8 @@ public class TripDto
     public TripStatus Status { get; set; }
     public string VehiclePhoto { get; set; }
     public WaypointStatus WaypointStatus { get; set; }
+    public string Route { get; set; }
+    public TripDirection TripDirection { get; set; }
 }
 
 public enum TripProgressStatusForUser
