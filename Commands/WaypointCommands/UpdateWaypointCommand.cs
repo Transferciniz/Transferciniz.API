@@ -37,13 +37,18 @@ public class UpdateWaypointCommandHandler: IRequestHandler<UpdateWaypointCommand
             var waypointUser = waypoint.WayPointUsers.First(x => x.Id == user.Id);
             waypointUser.IsCame = user.IsCame;
             _context.WayPointUsers.Update(waypointUser);
+            if (user.AccountId is not null)
+            {
+                await _locationHub.SendToAccount((Guid)user.AccountId, LocationHub.SocketMethods.OnWaypointStatusChanged, new
+                {
+                    status = (int)WaypointStatus.InProgress
+                });
+            }
+          
         }
 
         await _context.SaveChangesAsync(cancellationToken);
-        await _locationHub.SendToTrip(waypoint.TripId, LocationHub.SocketMethods.OnWaypointStatusChanged, new
-        {
-            status = (int)WaypointStatus.InProgress
-        });
+   
         return Unit.Value;
     }
 }
